@@ -1,0 +1,17 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+
+# Build outputs
+*.user
+*.suo
+
+# Packages
+FocusDimmer.Package/bin/
+FocusDimmer.Package/obj/
+
+# Logs
+*.log
+build_*.txt
+build_*.log

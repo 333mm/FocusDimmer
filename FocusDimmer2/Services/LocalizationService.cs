@@ -1,0 +1,237 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+
+namespace FocusDimmer.Services
+{
+    public class LocalizationService : INotifyPropertyChanged
+    {
+        public string AppTitle { get; set; } = "Focus Dimmer";
+        public string HeaderOverlay { get; set; } = "OVERLAY SETTINGS";
+        public string CheckDimEntirely { get; set; } = "Dim entire monitor when inactive";
+        public string TooltipDimEntirely { get; set; } = "Prioritized over other brightness options.";
+        public string CheckDimDesktopOnly { get; set; } = "Focus Mode: Display all windows brightly";
+        public string TooltipDimDesktopOnly { get; set; } = "Only the desktop area will be dimmed. Margin function disabled.";
+        public string CheckDimWhenIdle { get; set; } = "Dim entire monitor when idle";
+        public string CheckDimOnIdle { get; set; } = "Dim automatically when idle";
+        public string TooltipDimWhenIdle { get; set; } = "Prioritized over other brightness options.";
+        public string LabelColor { get; set; } = "Overlay Color";
+        public string LabelOpacity { get; set; } = "Opacity";
+        public string LabelOpacityLong { get; set; } = "Overlay Opacity";
+        public string LabelIdleOpacity { get; set; } = "Idle Opacity";
+        public string LabelMargin { get; set; } = "Margin";
+        public string LabelIdleTime { get; set; } = "Idle Time";
+        public string HeaderAnimation { get; set; } = "ANIMATION SETTINGS";
+        public string LabelDarken { get; set; } = "Fade In";
+        public string LabelBrighten { get; set; } = "Fade Out";
+        public string LabelWait { get; set; } = "Wait Time";
+        public string TooltipWait { get; set; } = "Time from when the window becomes active until the animation starts.";
+        public string LabelDuration { get; set; } = "Animation Time";
+        public string HeaderExclusionLists { get; set; } = "EXCLUSION LISTS (Process)";
+        public string CheckTaskbar { get; set; } = "Always keep Taskbar bright";
+        public string CheckTopmost { get; set; } = "Always keep Picture-in-Picture bright";
+        public string CheckTightFrame { get; set; } = "Fit dimming area tightly to window frame";
+        public string LabelAppList { get; set; } = "Don't dim when active (Process):";
+        public string LabelAlwaysBright { get; set; } = "Always bright (Process):";
+        public string LabelAlwaysDark { get; set; } = "Always dark (Process):";
+        public string BtnBrowse { get; set; } = "Browse";
+        public string TipAppList { get; set; } = "* .exe selection auto-appends process name.";
+        public string LabelToggle { get; set; } = "ON/OFF";
+        public string LabelDarker { get; set; } = "Darken";
+        public string LabelLighter { get; set; } = "Brighten";
+        public string BtnClose { get; set; } = "Close to Tray";
+        public string HeaderStartup { get; set; } = "Startup:";
+        public string CheckAutoStart { get; set; } = "Auto Start";
+        public string CheckAdmin { get; set; } = "Run as Admin";
+        public string WindowSelectApp { get; set; } = "Select App";
+        public string SearchPlaceholder { get; set; } = "Search processes...";
+        public string BtnRefresh { get; set; } = "Refresh";
+        public string BtnSelect { get; set; } = "Select";
+        public string BtnCancel { get; set; } = "Cancel";
+        public string MsgProRequired { get; set; } = "This feature requires the Pro version.\nWould you like to view it in the Store?";
+        public string BannerText { get; set; } = "Get Pro Version to unlock Multi-Monitor & Color settings!";
+        public string MigrationBannerText { get; set; } = "The new 'Unified' version is here! Pro users can migrate for free.";
+        public string MigrationBannerLink { get; set; } = "Migrate for Free 🚀";
+        public string MigrationGuideText { get; set; } = "";
+        public string MigrationOpenStorePage { get; set; } = "Open Unified Version Store Page";
+        
+        public string BtnAddIgnore { get; set; } = "Add to Ignore List";
+        public string BtnAddBright { get; set; } = "Add to Always Bright List";
+        public string BtnAddDark { get; set; } = "Add to Always Dark List";
+        public string DebugStatusClick { get; set; } = "Click to freeze";
+        public string DebugStatusSelect { get; set; } = "Select from the list";
+        
+        // Debug overlay strings
+        public string BtnDebug { get; set; } = "Debug";
+        public string TooltipDebugMode { get; set; } = "Displays window info under mouse cursor to find cause of bright areas.";
+        public string TooltipAlwaysDark { get; set; } = "Add processes causing bright spots (e.g., GeForce Experience).";
+        public string DebugNoWindow { get; set; } = "No window detected";
+        public string DebugProcess { get; set; } = "Process";
+        public string DebugClass { get; set; } = "Class";
+        public string DebugTitle { get; set; } = "Title";
+        public string DebugHoleAnalysis { get; set; } = "Hole Analysis";
+        public string DebugTaskbar { get; set; } = "Taskbar → Always Bright";
+        public string DebugTopmost { get; set; } = "Topmost → May be PiP Bright";
+        public string DebugMenu { get; set; } = "Menu/Popup → Always Bright";
+        public string DebugDialog { get; set; } = "Dialog → Special handling";
+        public string DebugToolWindow { get; set; } = "Tool Window";
+        public string DebugStandardWindow { get; set; } = "Standard window - check if in Always Bright/Dark list";
+        public string DebugAddToDarkList { get; set; } = "Add '{0}' to Always Dark list to dim this window.";
+        
+        // Indexer for accessing properties by string name
+        public string this[string propertyName]
+        {
+            get
+            {
+                var prop = this.GetType().GetProperty(propertyName);
+                return prop?.GetValue(this)?.ToString();
+            }
+        }
+
+        public void UpdateLanguage(string langCode)
+        {
+            SetDefaultEnglish();
+            string exePath = AppDomain.CurrentDomain.BaseDirectory;
+            string langPath = System.IO.Path.Combine(exePath, "Languages", $"{langCode}.json");
+            if (File.Exists(langPath))
+            {
+                try
+                {
+                    var options = new JsonSerializerOptions { AllowTrailingCommas = true, ReadCommentHandling = JsonCommentHandling.Skip };
+                    string json = File.ReadAllText(langPath);
+                    var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json, options);
+                    if (dict != null)
+                    {
+                        var properties = this.GetType().GetProperties();
+                        foreach (var kvp in dict)
+                        {
+                            var prop = properties.FirstOrDefault(p => p.Name == kvp.Key);
+                            if (prop != null && prop.CanWrite) prop.SetValue(this, kvp.Value);
+                        }
+                    }
+                }
+                catch { }
+            }
+            else if (langCode == "ja") SetDefaultJapanese();
+            OnProp(null);
+        }
+        private void SetDefaultEnglish()
+        {
+            AppTitle = "Focus Dimmer";
+            HeaderOverlay = "OVERLAY SETTINGS";
+            CheckDimEntirely = "Dim entire monitor when inactive";
+            TooltipDimEntirely = "Prioritized over other brightness options.";
+            CheckDimDesktopOnly = "Display all windows brightly";
+            TooltipDimDesktopOnly = "Only the desktop area will be dimmed. Margin function disabled.";
+            CheckDimWhenIdle = "Dim entire monitor when idle";
+            CheckDimOnIdle = "Dim automatically when idle";
+            TooltipDimWhenIdle = "Prioritized over other brightness options.";
+            LabelColor = "Overlay Color";
+            LabelOpacity = "Dim Level"; 
+            LabelOpacityLong = "Overlay Opacity";
+            LabelIdleOpacity = "Idle Opacity";
+            LabelMargin = "Margin";
+            LabelIdleTime = "Idle Time";
+            HeaderAnimation = "ANIMATION SETTINGS";
+            LabelDarken = "Fade In";
+            LabelBrighten = "Fade Out";
+            LabelWait = "Wait Time";
+            TooltipWait = "Time from when the window becomes active until the animation starts.";
+            LabelDuration = "Animation Time";
+            HeaderExclusionLists = "EXCLUSION LISTS (Process)";
+            CheckTaskbar = "Always keep Taskbar bright";
+            CheckTopmost = "Always keep Picture-in-Picture bright";
+            CheckTightFrame = "Fit dimming area tightly to window frame";
+            LabelAppList = "Don't dim when active (Process):";
+            LabelAlwaysBright = "Always bright (Process):";
+            LabelAlwaysDark = "Always dark (Process):";
+            TipAppList = "* .exe selection auto-appends process name.";
+            LabelToggle = "ON/OFF";
+            LabelDarker = "Darken";
+            LabelLighter = "Brighten";
+            BtnClose = "Close to Tray";
+            HeaderStartup = "Startup:";
+            CheckAutoStart = "Auto Start";
+            CheckAdmin = "Run as Admin";
+            WindowSelectApp = "Select App";
+            SearchPlaceholder = "Search processes...";
+            BtnRefresh = "Refresh";
+            BtnBrowse = "Browse...";
+            BtnSelect = "Select";
+            BtnCancel = "Cancel";
+            MsgProRequired = "This feature requires the Pro version.\nWould you like to view it in the Store?";
+            BannerText = "Get Pro Version to unlock Multi-Monitor & Color settings!";
+            MigrationBannerText = "We've unified the app to continue providing updates. \nExisting Pro users will automatically keep their Pro status in the new version.";
+            MigrationBannerLink = "Migrate to Latest Version 🚀";
+            MigrationGuideText = "Thank you for purchasing this app. To ensure smoother updates in the future, we have decided to unify the app structure into a \"Unified Version\".\n\nFuture Pro features will be provided as an \"Add-on (In-App Purchase)\" in the Unified Version. However, if you have already purchased this Pro version, you can continue to use Pro features for free by following these steps:\n\n1. Install the new \"Unified Version\" while keeping this app (Pro version) installed.\n\n2. Confirm that the Pro features are automatically unlocked in the Unified Version.\n\n3. After confirming the unlock, you can safely uninstall this app.\n\nYou can continue to use this app as is, but the store page will be hidden from non-purchasers, and updates will stop. To access the latest features, we strongly recommend migrating to the Unified Version.\n\nWe apologize for any inconvenience and appreciate your continued support.";
+            MigrationOpenStorePage = "Open Unified Version Store Page";
+            BtnAddIgnore = "Add to Ignore List";
+            BtnAddBright = "Add to Always Bright List";
+            BtnAddDark = "Add to Always Dark List";
+            DebugStatusClick = "Click to freeze";
+            DebugStatusSelect = "Select from the list";
+        }
+        private void SetDefaultJapanese()
+        {
+            AppTitle = "Focus Dimmer";
+            HeaderOverlay = "オーバーレイ設定";
+            CheckDimEntirely = "このモニタが非アクティブ時は全体を暗くする";
+            TooltipDimEntirely = "他の明るくなるオプションより優先されます。";
+            CheckDimDesktopOnly = "全てのウィンドウを明るく表示する";
+            TooltipDimDesktopOnly = "デスクトップエリアのみが暗くなります。余白機能が無効になります。";
+            CheckDimWhenIdle = "操作がない状態の時に全体を暗くする";
+            CheckDimOnIdle = "操作がない時に自動で暗くする";
+            TooltipDimWhenIdle = "他の明るくなるオプションより優先されます。";
+            LabelColor = "オーバーレイの色";
+            LabelOpacity = "減光レベル";
+            LabelOpacityLong = "オーバーレイの不透明度";
+            LabelIdleOpacity = "アイドル時の不透明度";
+            LabelMargin = "余白";
+            LabelIdleTime = "無操作時間";
+            HeaderAnimation = "アニメーション設定";
+            LabelDarken = "フェードイン";
+            LabelBrighten = "フェードアウト";
+            LabelWait = "待機時間";
+            TooltipWait = "ウィンドウがアクティブになってからアニメーションが開始されるまでの時間です。";
+            LabelDuration = "アニメーション時間";
+            HeaderExclusionLists = "除外設定 (プロセス)";
+            CheckTaskbar = "タスクバーを常に明るくする";
+            CheckTopmost = "ピクチャー・イン・ピクチャーを常に明るくする";
+            CheckTightFrame = "ウィンドウの枠に減光範囲をぴったり合わせる";
+            LabelAppList = "アクティブ時に減光させないプロセス:";
+            LabelAlwaysBright = "常に明るくするプロセス:";
+            LabelAlwaysDark = "常に暗くするプロセス:";
+            TipAppList = "※ .exe を選択するとプロセス名が追加されます";
+            LabelToggle = "ON/OFF";
+            LabelDarker = "暗くする";
+            LabelLighter = "明るくする";
+            BtnClose = "タスクトレイに閉じる";
+            HeaderStartup = "起動設定:";
+            CheckAutoStart = "自動起動";
+            CheckAdmin = "管理者権限";
+            WindowSelectApp = "アプリ選択";
+            SearchPlaceholder = "プロセスを検索...";
+            BtnRefresh = "更新";
+            BtnBrowse = "ファイル参照...";
+            BtnSelect = "選択";
+            BtnCancel = "キャンセル";
+            MsgProRequired = "この機能はPro版のみ使用可能です。\nストアでPro版を確認しますか？";
+            BannerText = "Pro版を取得してマルチモニターや色設定を解除！";
+            MigrationBannerText = "今後のアップデートを継続するため、アプリ構成を統合しました。\n現在のPro版ユーザー様は、本統合版をインストール後、古いFocusDimmerはアンインストールしてください。";
+            MigrationBannerLink = "統合版(最新)へ無料移行 🚀";
+            MigrationGuideText = "この度は本アプリをご購入いただき、誠にありがとうございます。 今後、よりスムーズにアップデートを継続していくため、勝手ながらアプリの構成を「統合版」へと一本化させていただくこととなりました。\n\n今後のPro版機能は、統合版における「アドオン（アプリ内課金）」として提供されますが、すでに本Pro版をご購入いただいている皆様は、以下の手順で引き続きPro機能を無料でご利用いただけます。\n\n1. 本アプリ（Pro版）をインストールした状態のまま、新しい「統合版」をインストールしてください。\n\n2. 統合版にてPro機能が自動的にアンロックされていることを確認してください。\n\n3. アンロックの確認後は、本アプリをアンインストールしていただいて問題ありません。\n\nなお、本アプリをそのまま使い続けることも可能ですが、今後のストアページはご購入者様以外には非公開となり、ページの更新も停止いたします。最新の機能をご利用いただくためにも、ぜひ統合版への移行をお願い申し上げます。\n\nご不便をおかけいたしますが、今後ともよろしくお願いいたします。";
+            MigrationOpenStorePage = "統合版のストアページを開く";
+            BtnAddIgnore = "除外リストに追加する";
+            BtnAddBright = "常に明るくするリストに追加する";
+            BtnAddDark = "常に暗くするリストに追加する";
+            DebugStatusClick = "クリックしてフリーズ";
+            DebugStatusSelect = "リストから選択してください";
+        }
+        public event PropertyChangedEventHandler? PropertyChanged;
+        void OnProp([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+}

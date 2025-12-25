@@ -1,0 +1,24 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="LegacyPro" />
+    <BuildType Name="Lite" />
+    <BuildType Name="Pro" />
+    <BuildType Name="Release" />
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="FocusDimmer.Package/FocusDimmer.Package.wapproj" Type="c7167f0d-bc9f-4e6e-afe1-012c56b48db5" Id="b4e93ed6-e277-41b3-ba71-7e77aabdb5ba">
+    <BuildType Solution="Debug|Any CPU" Project="Release" />
+    <BuildType Solution="Debug|x64" Project="Release" />
+    <Deploy />
+  </Project>
+  <Project Path="FocusDimmer2/FocusDimmer.csproj">
+    <BuildType Solution="Debug|Any CPU" Project="Release" />
+    <BuildType Solution="Debug|x64" Project="Release" />
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+</Solution>
