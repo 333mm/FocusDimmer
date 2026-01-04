@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10" IgnorableNamespaces="uap rescap desktop">
-  <Identity Name="sanmiri.FocusDimmerLite" Publisher="CN=8D2E4F19-4148-46A8-A15D-9F67D407A628" Version="1.6.1.0" />
+  <Identity Name="sanmiri.FocusDimmerLite" Publisher="CN=8D2E4F19-4148-46A8-A15D-9F67D407A628" Version="1.6.2.0" />
   <Properties>
     <DisplayName>Focus Dimmer</DisplayName>
     <PublisherDisplayName>sanmiri</PublisherDisplayName>
