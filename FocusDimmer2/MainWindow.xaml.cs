@@ -424,16 +424,19 @@ namespace FocusDimmer
                 double t = (this.ActualWidth > 0) ? this.Top : _appSettings.WindowTop;
 
                 var settings = new AppSettings 
-                { 
-                    Profiles = new List<MonitorProfile>(MonitorProfiles), 
-                    AutoStart = AutoStartCheck.IsChecked == true, 
-                    RunAsAdmin = false,
-                    // Save window state
-                    WindowWidth = w,
-                    WindowHeight = h,
-                    WindowLeft = l,
-                    WindowTop = t
-                };
+        { 
+            Profiles = new List<MonitorProfile>(MonitorProfiles), 
+            AutoStart = AutoStartCheck.IsChecked == true, 
+            RunAsAdmin = false,
+            // Save window state
+            WindowWidth = w,
+            WindowHeight = h,
+            WindowLeft = l,
+            WindowTop = t,
+            // License migration persistence - carry over from existing settings
+            IsLegacyMigrated = _appSettings.IsLegacyMigrated,
+            IsLegacyBannerDismissed = _appSettings.IsLegacyBannerDismissed
+        };
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(_settingsPath, json);

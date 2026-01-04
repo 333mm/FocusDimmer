@@ -361,17 +361,17 @@
     <Language Code="zu-za" InMinimumRequirementSet="true" />
   </SupportedLocales>
   <ProductReservedInfo>
-    <MainPackageIdentityName>sanmiri.FocusDimmer</MainPackageIdentityName>
+    <MainPackageIdentityName>sanmiri.FocusDimmerLite</MainPackageIdentityName>
     <ReservedNames>
-      <ReservedName>Focus Dimmer Pro</ReservedName>
+      <ReservedName>Focus Dimmer</ReservedName>
     </ReservedNames>
   </ProductReservedInfo>
   <AccountPackageIdentityNames>
-    <MainPackageIdentityName>sanmiri.FocusDimmerLite</MainPackageIdentityName>
+    <MainPackageIdentityName>sanmiri.FocusDimmer</MainPackageIdentityName>
     <MainPackageIdentityName>sanmiri.SnapTrans</MainPackageIdentityName>
     <MainPackageIdentityName>sanmiri.51731289A232E</MainPackageIdentityName>
     <MainPackageIdentityName>sanmiri.SwiftVolume</MainPackageIdentityName>
     <MainPackageIdentityName>sanmiri.ZzzSave</MainPackageIdentityName>
   </AccountPackageIdentityNames>
-  <PackageInfoList LandingUrl="https://devcenterapi.dce.mp.microsoft.com/dashboard/Application?appId=9N62D3G899G7" />
+  <PackageInfoList LandingUrl="https://devcenterapi.dce.mp.microsoft.com/dashboard/Application?appId=9NXHXPNJL79X" />
 </StoreAssociation>
