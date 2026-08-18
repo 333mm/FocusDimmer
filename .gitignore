@@ -10,8 +10,15 @@ obj/
 # Packages
 FocusDimmer.Package/bin/
 FocusDimmer.Package/obj/
+AppPackages/
+**/AppPackages/
+*.msixupload
+*.msixbundle
+*.appxupload
+*.appxbundle
 
 # Logs
 *.log
 build_*.txt
 build_*.log
+
