@@ -192,5 +192,10 @@ namespace FocusDimmer.Services
                    cls == "ComboLBox" ||
                    cls == "Windows.UI.Core.CoreWindow";
         }
+
+        public static readonly IntPtr DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = new IntPtr(-4);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SetProcessDpiAwarenessContext(IntPtr dpiFlag);
     }
 }

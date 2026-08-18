@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 
 namespace FocusDimmer
 {
@@ -12,6 +12,12 @@ namespace FocusDimmer
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            try
+            {
+                FocusDimmer.Services.NativeMethods.SetProcessDpiAwarenessContext(FocusDimmer.Services.NativeMethods.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+            }
+            catch { }
+
             // Check command line args (Unpackaged / Fallback)
             if (e.Args != null)
             {

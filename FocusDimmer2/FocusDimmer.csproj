@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
@@ -10,6 +10,9 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
 		<ApplicationIcon>icon.ico</ApplicationIcon>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+		<NoWarn>$(NoWarn);WFO0003</NoWarn>
 		<Platforms>AnyCPU;x64</Platforms>
 		<Configurations>Debug;Release;Lite;Pro;LegacyPro</Configurations>
 	</PropertyGroup>
