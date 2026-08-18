@@ -102,6 +102,20 @@ namespace FocusDimmer.Services
         public string TooltipSetAsDefault { get; set; } = "Set as Default Preset";
         public string MenuRename { get; set; } = "Rename";
         
+        // Navigation & New Sections
+        public string NavMonitors { get; set; } = "Monitors";
+        public string NavExclusions { get; set; } = "App Exclusions";
+        public string NavHotkeys { get; set; } = "Shortcuts";
+        public string NavPresets { get; set; } = "Presets";
+        public string NavGeneral { get; set; } = "General";
+        public string HeaderAdvancedBehavior { get; set; } = "Advanced Behavior";
+        public string SubHeaderHotkeys { get; set; } = "Configure keyboard shortcuts to quickly control dimming.";
+        public string HeaderLanguage { get; set; } = "Language";
+        public string SubHeaderLanguage { get; set; } = "Choose display language";
+        public string SubHeaderGeneral { get; set; } = "App startup, behavior and language settings.";
+        public string BtnMigrationInfo { get; set; } = "Migration Info";
+        public string MsgStartupDisabledByUser { get; set; } = "Startup is disabled in Windows Settings or Task Manager.\nPlease enable Focus Dimmer in Windows 'Startup Apps' settings.";
+        
         // Indexer for accessing properties by string name
         public string? this[string propertyName]
         {
@@ -214,6 +228,18 @@ namespace FocusDimmer.Services
             LabelDefault = "(Default)";
             TooltipSetAsDefault = "Set as Default Preset";
             MenuRename = "Rename";
+            NavMonitors = "Monitors";
+            NavExclusions = "App Exclusions";
+            NavHotkeys = "Shortcuts";
+            NavPresets = "Presets";
+            NavGeneral = "General";
+            HeaderAdvancedBehavior = "Advanced Behavior";
+            SubHeaderHotkeys = "Configure keyboard shortcuts to quickly control dimming.";
+            HeaderLanguage = "Language";
+            SubHeaderLanguage = "Choose display language";
+            SubHeaderGeneral = "App startup, behavior and language settings.";
+            BtnMigrationInfo = "Migration Info";
+            MsgStartupDisabledByUser = "Startup is disabled in Windows Settings or Task Manager.\nPlease enable Focus Dimmer in Windows 'Startup Apps' settings.";
         }
         private void SetDefaultJapanese()
         {
@@ -290,6 +316,18 @@ namespace FocusDimmer.Services
             LabelDefault = "(既定)";
             TooltipSetAsDefault = "既定のプリセットに設定";
             MenuRename = "名前を変更";
+            NavMonitors = "モニター";
+            NavExclusions = "アプリ除外";
+            NavHotkeys = "ショートカット";
+            NavPresets = "プリセット";
+            NavGeneral = "一般設定";
+            HeaderAdvancedBehavior = "高度な動作設定";
+            SubHeaderHotkeys = "減光を素早く切り替えるキーボードショートカットを設定します。";
+            HeaderLanguage = "言語 / Language";
+            SubHeaderLanguage = "表示言語を選択します";
+            SubHeaderGeneral = "アプリの起動、動作、言語の設定です。";
+            BtnMigrationInfo = "移行情報";
+            MsgStartupDisabledByUser = "自動起動が Windows の設定またはタスクマネージャーによって無効化されています。\nWindows の「スタートアップ アプリ」設定を開いて Focus Dimmer を有効にしてください。";
         }
         public event PropertyChangedEventHandler? PropertyChanged;
         void OnProp([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

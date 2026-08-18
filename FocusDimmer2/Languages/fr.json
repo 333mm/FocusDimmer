@@ -74,5 +74,17 @@
   "MigrationBannerText": "Nous avons unifié la configuration de l'application pour les mises à jour continues.\nUtilisateurs Pro existants, veuillez désinstaller l'ancien Focus Dimmer après avoir installé cette version unifiée.",
   "MigrationBannerLink": "Migrate to Latest Version 🚀",
   "MigrationGuideText": "Merci d'avoir acheté cette application. Pour assurer des mises à jour plus fluides à l'avenir, nous avons décidé d'unifier la structure de l'application en une \"Version Unifiée\".\n\nLes futures fonctionnalités Pro seront fournies sous forme de \"Module complémentaire (achat intégré)\" dans la Version Unifiée. Cependant, si vous avez déjà acheté cette version Pro, vous pouvez continuer à utiliser les fonctionnalités Pro gratuitement en suivant ces étapes :\n\n1. Installez la nouvelle \"Version Unifiée\" tout en gardant cette application (version Pro) installée.\n\n2. Vérifiez que les fonctionnalités Pro sont automatiquement débloquées dans la Version Unifiée.\n\n3. Après avoir confirmé le déblocage, vous pouvez désinstaller cette application en toute sécurité.\n\nVous pouvez continuer à utiliser cette application telle quelle, mais la page du magasin sera masquée pour les non-acheteurs et les mises à jour cesseront. Pour accéder aux dernières fonctionnalités, nous vous recommandons vivement de migrer vers la Version Unifiée.\n\nNous nous excusons pour tout inconvénient et vous remercions de votre soutien continu.",
-  "MigrationOpenStorePage": "Ouvrir la page de la version unifiée"
+  "MigrationOpenStorePage": "Ouvrir la page de la version unifiée",
+  "NavMonitors": "Moniteurs",
+  "NavExclusions": "Exclusions d'apps",
+  "NavHotkeys": "Raccourcis",
+  "NavPresets": "Préréglages",
+  "NavGeneral": "Général",
+  "HeaderAdvancedBehavior": "Comportement avancé",
+  "SubHeaderHotkeys": "Configurez des raccourcis clavier pour contrôler rapidement l'atténuation.",
+  "HeaderLanguage": "Langue",
+  "SubHeaderLanguage": "Choisir la langue d'affichage",
+  "SubHeaderGeneral": "Démarrage de l'application, comportement et paramètres de langue.",
+  "BtnMigrationInfo": "Info de migration",
+  "MsgStartupDisabledByUser": "Le démarrage automatique est désactivé dans les paramètres Windows ou le Gestionnaire des tâches.\nVeuillez activer Focus Dimmer dans les paramètres 'Applications de démarrage' de Windows."
 }

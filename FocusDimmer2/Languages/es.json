@@ -74,5 +74,17 @@
   "MigrationBannerText": "Hemos unificado la configuración de la aplicación para actualizaciones continuas.\nUsuarios Pro existentes, desinstalen el antiguo Focus Dimmer después de instalar esta versión unificada.",
   "MigrationBannerLink": "Migrate to Latest Version 🚀",
   "MigrationGuideText": "Gracias por comprar esta aplicación. Para garantizar actualizaciones más fluidas en el futuro, hemos decidido unificar la estructura de la aplicación en una \"Versión Unificada\".\n\nLas futuras funciones Pro se proporcionarán como un \"Complemento (compra en la aplicación)\" en la Versión Unificada. Sin embargo, si ya ha comprado esta versión Pro, puede seguir utilizando las funciones Pro de forma gratuita siguiendo estos pasos:\n\n1. Instale la nueva \"Versión Unificada\" mientras mantiene instalada esta aplicación (versión Pro).\n\n2. Confirme que las funciones Pro se desbloquean automáticamente en la Versión Unificada.\n\n3. Después de confirmar el desbloqueo, puede desinstalar esta aplicación de forma segura.\n\nPuede seguir utilizando esta aplicación tal como está, pero la página de la tienda se ocultará a los no compradores y las actualizaciones se detendrán. Para acceder a las últimas funciones, recomendamos encarecidamente migrar a la Versión Unificada.\n\nNos disculpamos por cualquier inconveniente y agradecemos su apoyo continuo.",
-  "MigrationOpenStorePage": "Abrir la página de la versión unificada"
+  "MigrationOpenStorePage": "Abrir la página de la versión unificada",
+  "NavMonitors": "Monitores",
+  "NavExclusions": "Exclusiones de apps",
+  "NavHotkeys": "Atajos",
+  "NavPresets": "Ajustes preestablecidos",
+  "NavGeneral": "General",
+  "HeaderAdvancedBehavior": "Comportamiento avanzado",
+  "SubHeaderHotkeys": "Configura atajos de teclado para controlar rápidamente la atenuación.",
+  "HeaderLanguage": "Idioma",
+  "SubHeaderLanguage": "Elige el idioma de visualización",
+  "SubHeaderGeneral": "Inicio de la app, comportamiento y configuración de idioma.",
+  "BtnMigrationInfo": "Info de migración",
+  "MsgStartupDisabledByUser": "El inicio automático está deshabilitado en la Configuración de Windows o en el Administrador de tareas.\nHabilita Focus Dimmer en la configuración de 'Aplicaciones de inicio' de Windows."
 }

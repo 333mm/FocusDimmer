@@ -123,9 +123,17 @@ namespace FocusDimmer
             get => _selectedGlobalPresetId; 
             set 
             { 
-                _selectedGlobalPresetId = value; 
-                NotifyPropertyChanged();
-                NotifyPropertyChanged(nameof(SelectedGlobalPreset));
+                if (_selectedGlobalPresetId != value)
+                {
+                    _selectedGlobalPresetId = value; 
+                    NotifyPropertyChanged();
+                    NotifyPropertyChanged(nameof(SelectedGlobalPreset));
+                    if (SelectedGlobalPreset != null && !_isApplyingPreset)
+                    {
+                        ApplyGlobalPresetToAllMonitors(SelectedGlobalPreset);
+                    }
+                    _appSettings.SelectedPresetId = _selectedGlobalPresetId;
+                }
             } 
         }
         
@@ -645,13 +653,23 @@ namespace FocusDimmer
         { 
             if (_isInitialized && !_ignoreAutoStartEvents) 
             { 
-                 bool success = await StartupManager.TryEnableStartupAsync();
-                 if (!success) 
+                 var result = await StartupManager.EnableStartupAsync();
+                 if (result != StartupEnableResult.Success) 
                  {
-                     // Revert if failed
+                     // Revert check
                      _ignoreAutoStartEvents = true;
                      AutoStartCheck.IsChecked = false;
                      _ignoreAutoStartEvents = false;
+
+                     if (result == StartupEnableResult.DisabledByUser)
+                     {
+                         System.Windows.MessageBox.Show(Strings.MsgStartupDisabledByUser, Strings.AppTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                         try
+                         {
+                             Process.Start(new ProcessStartInfo("ms-settings:startupapps") { UseShellExecute = true });
+                         }
+                         catch { }
+                     }
                  }
                  RequestSave(); 
             } 
@@ -1073,6 +1091,18 @@ namespace FocusDimmer
         private void MinimizeButton_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
         private void CloseButton_Click(object sender, RoutedEventArgs e) => this.Close();
 
+        private void NavButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.RadioButton rb && rb.Tag is string tag)
+            {
+                if (PageMonitors != null) PageMonitors.Visibility = (tag == "Monitors") ? Visibility.Visible : Visibility.Collapsed;
+                if (PageExclusions != null) PageExclusions.Visibility = (tag == "Exclusions") ? Visibility.Visible : Visibility.Collapsed;
+                if (PageHotkeys != null) PageHotkeys.Visibility = (tag == "Hotkeys") ? Visibility.Visible : Visibility.Collapsed;
+                if (PagePresets != null) PagePresets.Visibility = (tag == "Presets") ? Visibility.Visible : Visibility.Collapsed;
+                if (PageGeneral != null) PageGeneral.Visibility = (tag == "General") ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
         private void HotkeyBox_GotFocus(object sender, RoutedEventArgs e) => _focusingHotkeyBox = sender as TextBox;
         private void HotkeyBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -1460,66 +1490,47 @@ namespace FocusDimmer
             switch (propertyName)
             {
                 case nameof(MonitorProfile.Opacity):
-                    if (preset.Opacity != profile.Opacity) { preset.Opacity = profile.Opacity; PropagateToOtherMonitors(p => p.Opacity = profile.Opacity, profile); }
+                    preset.Opacity = profile.Opacity;
                     break;
                 case nameof(MonitorProfile.Margin):
-                    if (preset.Margin != profile.Margin) { preset.Margin = profile.Margin; PropagateToOtherMonitors(p => p.Margin = profile.Margin, profile); }
+                    preset.Margin = profile.Margin;
                     break;
                 case nameof(MonitorProfile.DelayDarken):
-                    if (preset.DelayDarken != profile.DelayDarken) { preset.DelayDarken = profile.DelayDarken; PropagateToOtherMonitors(p => p.DelayDarken = profile.DelayDarken, profile); }
+                    preset.DelayDarken = profile.DelayDarken;
                     break;
                 case nameof(MonitorProfile.DurationDarken):
-                    if (preset.DurationDarken != profile.DurationDarken) { preset.DurationDarken = profile.DurationDarken; PropagateToOtherMonitors(p => p.DurationDarken = profile.DurationDarken, profile); }
+                    preset.DurationDarken = profile.DurationDarken;
                     break;
                 case nameof(MonitorProfile.DurationBrighten):
-                    if (preset.DurationBrighten != profile.DurationBrighten) { preset.DurationBrighten = profile.DurationBrighten; PropagateToOtherMonitors(p => p.DurationBrighten = profile.DurationBrighten, profile); }
+                    preset.DurationBrighten = profile.DurationBrighten;
                     break;
                 case nameof(MonitorProfile.ExcludeTaskbar):
-                    if (preset.ExcludeTaskbar != profile.ExcludeTaskbar) { preset.ExcludeTaskbar = profile.ExcludeTaskbar; PropagateToOtherMonitors(p => p.ExcludeTaskbar = profile.ExcludeTaskbar, profile); }
+                    preset.ExcludeTaskbar = profile.ExcludeTaskbar;
                     break;
                 case nameof(MonitorProfile.ExcludeTopmost):
-                    if (preset.ExcludeTopmost != profile.ExcludeTopmost) { preset.ExcludeTopmost = profile.ExcludeTopmost; PropagateToOtherMonitors(p => p.ExcludeTopmost = profile.ExcludeTopmost, profile); }
+                    preset.ExcludeTopmost = profile.ExcludeTopmost;
                     break;
                 case nameof(MonitorProfile.UseTightFrame):
-                    if (preset.UseTightFrame != profile.UseTightFrame) { preset.UseTightFrame = profile.UseTightFrame; PropagateToOtherMonitors(p => p.UseTightFrame = profile.UseTightFrame, profile); }
+                    preset.UseTightFrame = profile.UseTightFrame;
                     break;
                 case nameof(MonitorProfile.DimEntirelyWhenInactive):
-                    if (preset.DimEntirelyWhenInactive != profile.DimEntirelyWhenInactive) { preset.DimEntirelyWhenInactive = profile.DimEntirelyWhenInactive; PropagateToOtherMonitors(p => p.DimEntirelyWhenInactive = profile.DimEntirelyWhenInactive, profile); }
+                    preset.DimEntirelyWhenInactive = profile.DimEntirelyWhenInactive;
                     break;
                 case nameof(MonitorProfile.DimDesktopOnly):
-                    if (preset.DimDesktopOnly != profile.DimDesktopOnly) { preset.DimDesktopOnly = profile.DimDesktopOnly; PropagateToOtherMonitors(p => p.DimDesktopOnly = profile.DimDesktopOnly, profile); }
+                    preset.DimDesktopOnly = profile.DimDesktopOnly;
                     break;
                 case nameof(MonitorProfile.DimWhenIdle):
-                    if (preset.DimWhenIdle != profile.DimWhenIdle) { preset.DimWhenIdle = profile.DimWhenIdle; PropagateToOtherMonitors(p => p.DimWhenIdle = profile.DimWhenIdle, profile); }
+                    preset.DimWhenIdle = profile.DimWhenIdle;
                     break;
                 case nameof(MonitorProfile.IdleTimeout):
-                    if (preset.IdleTimeout != profile.IdleTimeout) { preset.IdleTimeout = profile.IdleTimeout; PropagateToOtherMonitors(p => p.IdleTimeout = profile.IdleTimeout, profile); }
+                    preset.IdleTimeout = profile.IdleTimeout;
                     break;
                 case nameof(MonitorProfile.IdleDimOpacity):
-                    if (preset.IdleDimOpacity != profile.IdleDimOpacity) { preset.IdleDimOpacity = profile.IdleDimOpacity; PropagateToOtherMonitors(p => p.IdleDimOpacity = profile.IdleDimOpacity, profile); }
+                    preset.IdleDimOpacity = profile.IdleDimOpacity;
                     break;
                 case nameof(MonitorProfile.OverlayColorHex):
-                    if (preset.OverlayColorHex != profile.OverlayColorHex) { preset.OverlayColorHex = profile.OverlayColorHex; PropagateToOtherMonitors(p => p.OverlayColorHex = profile.OverlayColorHex, profile); }
+                    preset.OverlayColorHex = profile.OverlayColorHex;
                     break;
-            }
-        }
-
-        private void PropagateToOtherMonitors(Action<MonitorProfile> action, MonitorProfile sourceProfile)
-        {
-            _isApplyingPreset = true;
-            try
-            {
-                foreach (var p in MonitorProfiles)
-                {
-                    if (p != sourceProfile)
-                    {
-                        action(p);
-                    }
-                }
-            }
-            finally
-            {
-                _isApplyingPreset = false;
             }
         }
 

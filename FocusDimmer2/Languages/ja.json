@@ -84,5 +84,17 @@
   "MigrationBannerLink": "統合版(最新)へ無料移行 🚀",
   "MigrationGuideText": "この度は本アプリをご購入いただき、誠にありがとうございます。 今後、よりスムーズにアップデートを継続していくため、勝手ながらアプリの構成を「統合版」へと一本化させていただくこととなりました。\n\n今後のPro版機能は、統合版における「アドオン（アプリ内課金）」として提供されますが、すでに本Pro版をご購入いただいている皆様は、以下の手順で引き続きPro機能を無料でご利用いただけます。\n\n1. 本アプリ（Pro版）をインストールした状態のまま、新しい「統合版」をインストールしてください。\n\n2. 統合版にてPro機能が自動的にアンロックされていることを確認してください。\n\n3. アンロックの確認後は、本アプリをアンインストールしていただいて問題ありません。\n\nなお、本アプリをそのまま使い続けることも可能ですが、今後のストアページはご購入者様以外には非公開となり、ページの更新も停止いたします。最新の機能をご利用いただくためにも、ぜひ統合版への移行をお願い申し上げます。\n\nご不便をおかけいたしますが、今後ともよろしくお願いいたします。",
   "MigrationOpenStorePage": "統合版のストアページを開く",
-  "LabelCopyright": "Copyright © 2025 Focus Dimmer. All rights reserved."
+  "LabelCopyright": "Copyright © 2025 Focus Dimmer. All rights reserved.",
+  "NavMonitors": "モニター",
+  "NavExclusions": "アプリ除外",
+  "NavHotkeys": "ショートカット",
+  "NavPresets": "プリセット",
+  "NavGeneral": "一般設定",
+  "HeaderAdvancedBehavior": "高度な動作設定",
+  "SubHeaderHotkeys": "減光を素早く切り替えるキーボードショートカットを設定します。",
+  "HeaderLanguage": "言語 / Language",
+  "SubHeaderLanguage": "表示言語を選択します",
+  "SubHeaderGeneral": "アプリの起動、動作、言語の設定です。",
+  "BtnMigrationInfo": "移行情報",
+  "MsgStartupDisabledByUser": "自動起動が Windows の設定またはタスクマネージャーによって無効化されています。\nWindows の「スタートアップ アプリ」設定を開いて Focus Dimmer を有効にしてください。"
 }

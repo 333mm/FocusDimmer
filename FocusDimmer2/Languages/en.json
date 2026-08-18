@@ -84,5 +84,17 @@
   "MigrationBannerLink": "Migrate to Latest Version 🚀",
   "MigrationGuideText": "Thank you for purchasing this app. To ensure smoother updates in the future, we have decided to unify the app structure into a \"Unified Version\".\n\nFuture Pro features will be provided as an \"Add-on (In-App Purchase)\" in the Unified Version. However, if you have already purchased this Pro version, you can continue to use Pro features for free by following these steps:\n\n1. Install the new \"Unified Version\" while keeping this app (Pro version) installed.\n\n2. Confirm that the Pro features are automatically unlocked in the Unified Version.\n\n3. After confirming the unlock, you can safely uninstall this app.\n\nYou can continue to use this app as is, but the store page will be hidden from non-purchasers, and updates will stop. To access the latest features, we strongly recommend migrating to the Unified Version.\n\nWe apologize for any inconvenience and appreciate your continued support.",
   "MigrationOpenStorePage": "Open Unified Version Store Page",
-  "LabelCopyright": "Copyright © 2025 Focus Dimmer. All rights reserved."
+  "LabelCopyright": "Copyright © 2025 Focus Dimmer. All rights reserved.",
+  "NavMonitors": "Monitors",
+  "NavExclusions": "App Exclusions",
+  "NavHotkeys": "Shortcuts",
+  "NavPresets": "Presets",
+  "NavGeneral": "General",
+  "HeaderAdvancedBehavior": "Advanced Behavior",
+  "SubHeaderHotkeys": "Configure keyboard shortcuts to quickly control dimming.",
+  "HeaderLanguage": "Language",
+  "SubHeaderLanguage": "Choose display language",
+  "SubHeaderGeneral": "App startup, behavior and language settings.",
+  "BtnMigrationInfo": "Migration Info",
+  "MsgStartupDisabledByUser": "Startup is disabled in Windows Settings or Task Manager.\nPlease enable Focus Dimmer in Windows 'Startup Apps' settings."
 }

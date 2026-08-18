@@ -5,6 +5,14 @@ using System.Threading.Tasks;
 
 namespace FocusDimmer.Services
 {
+    public enum StartupEnableResult
+    {
+        Success,
+        DisabledByUser,
+        DisabledByPolicy,
+        Error
+    }
+
     public static class StartupManager
     {
         private const string AppName = "FocusDimmer";
@@ -25,21 +33,29 @@ namespace FocusDimmer.Services
             }
         }
 
-        public static async Task<bool> TryEnableStartupAsync()
+        public static async Task<StartupEnableResult> EnableStartupAsync()
         {
             if (IsPackaged)
             {
                 try
                 {
                     var startupTask = await Windows.ApplicationModel.StartupTask.GetAsync(StartupTaskId);
-                    if (startupTask.State != Windows.ApplicationModel.StartupTaskState.Enabled)
+                    switch (startupTask.State)
                     {
-                        var state = await startupTask.RequestEnableAsync();
-                        return state == Windows.ApplicationModel.StartupTaskState.Enabled;
+                        case Windows.ApplicationModel.StartupTaskState.DisabledByUser:
+                            return StartupEnableResult.DisabledByUser;
+                        case Windows.ApplicationModel.StartupTaskState.DisabledByPolicy:
+                            return StartupEnableResult.DisabledByPolicy;
+                        case Windows.ApplicationModel.StartupTaskState.Disabled:
+                            var state = await startupTask.RequestEnableAsync();
+                            return state == Windows.ApplicationModel.StartupTaskState.Enabled ? StartupEnableResult.Success : StartupEnableResult.DisabledByUser;
+                        case Windows.ApplicationModel.StartupTaskState.Enabled:
+                            return StartupEnableResult.Success;
+                        default:
+                            return StartupEnableResult.Error;
                     }
-                    return true;
                 }
-                catch { return false; }
+                catch { return StartupEnableResult.Error; }
             }
             else
             {
@@ -47,10 +63,16 @@ namespace FocusDimmer.Services
                 { 
                     using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true); 
                     key?.SetValue(AppName, $"\"{Process.GetCurrentProcess().MainModule?.FileName ?? ""}\" /autostart");
-                    return true;
+                    return StartupEnableResult.Success;
                 } 
-                catch { return false; }
+                catch { return StartupEnableResult.Error; }
             }
+        }
+
+        public static async Task<bool> TryEnableStartupAsync()
+        {
+            var result = await EnableStartupAsync();
+            return result == StartupEnableResult.Success;
         }
 
         public static async Task<bool> DisableStartupAsync()

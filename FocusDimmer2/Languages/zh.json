@@ -74,6 +74,18 @@
   "MigrationBannerText": "我们已统一应用配置以持续更新。\n现有专业版用户，请在安装此统一版本后卸载旧的 Focus Dimmer。",
   "MigrationBannerLink": "迁移到最新版本 🚀",
   "MigrationGuideText": "感谢您购买此应用程序。为了确保将来更新更顺畅，我们决定将应用程序结构统一为“统一版本”。\n\n未来的专业版功能将在统一版本中作为“附加组件（应用内购买）”提供。但是，如果您已经购买了此专业版，则可以按照以下步骤免费继续使用专业版功能：\n\n1. 在保留已安装此应用程序（专业版）的同时安装新的“统一版本”。\n\n2. 确认专业版功能在统一版本中自动解锁。\n\n3. 确认解锁后，您可以安全地卸载此应用程序。\n\n您可以继续原样使用此应用程序，但商店页面将对非购买者隐藏，并且更新将停止。要访问最新功能，我们要强烈建议迁移到统一版本。\n\n对于给您带来的任何不便，我们要深表歉意，并感谢您的持续支持。",
-  "MigrationOpenStorePage": "打开统一版本商店页面",
-  "LabelCopyright": "版权所有 © 2025 Focus Dimmer. 保留所有权利。"
+  "MigrationOpenStorePage": "打开统一版商店页面",
+  "LabelCopyright": "Copyright © 2025 Focus Dimmer. All rights reserved.",
+  "NavMonitors": "显示器",
+  "NavExclusions": "应用排除",
+  "NavHotkeys": "快捷键",
+  "NavPresets": "预设",
+  "NavGeneral": "常规设置",
+  "HeaderAdvancedBehavior": "高级行为设置",
+  "SubHeaderHotkeys": "配置快捷键以快速控制减光。",
+  "HeaderLanguage": "语言 / Language",
+  "SubHeaderLanguage": "选择显示语言",
+  "SubHeaderGeneral": "应用程序启动、行为和语言设置。",
+  "BtnMigrationInfo": "迁移信息",
+  "MsgStartupDisabledByUser": "自动启动已在 Windows 设置或任务管理器中被禁用。\n请在 Windows“启动应用”设置中启用 Focus Dimmer。"
 }
