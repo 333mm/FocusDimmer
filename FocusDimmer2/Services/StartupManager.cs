@@ -46,7 +46,7 @@ namespace FocusDimmer.Services
                 try 
                 { 
                     using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true); 
-                    key?.SetValue(AppName, $"\"{Process.GetCurrentProcess().MainModule.FileName}\" /autostart");
+                    key?.SetValue(AppName, $"\"{Process.GetCurrentProcess().MainModule?.FileName ?? ""}\" /autostart");
                     return true;
                 } 
                 catch { return false; }

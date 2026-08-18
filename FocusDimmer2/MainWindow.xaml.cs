@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -44,7 +44,7 @@ using WinForms = System.Windows.Forms;
 
 namespace FocusDimmer
 {
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    public partial class MainWindow : FluentWindow, INotifyPropertyChanged
     {
         private readonly StoreService _storeService = new StoreService();
         private bool _isPro = false;
@@ -57,7 +57,7 @@ namespace FocusDimmer
         public bool IsPro
         {
             get => _isPro;
-            private set
+            internal set
             {
                 _isPro = value;
                 NotifyPropertyChanged();
@@ -67,6 +67,20 @@ namespace FocusDimmer
                 NotifyPropertyChanged(nameof(ProBadgeVisibility));
             }
         }
+        
+#if DEBUG
+        public bool IsProDebugToggle
+        {
+            get => IsPro;
+            set 
+            {
+                IsPro = value;
+                InitializeMonitors();
+            }
+        }
+
+        public Visibility DebugModeVisibility => Visibility.Visible;
+#endif
         public bool IsFreeVersion => !IsPro;
         public Visibility FreeBannerVisibility => (IsFreeVersion && !IsLegacyPro) ? Visibility.Visible : Visibility.Collapsed;
         
@@ -100,7 +114,59 @@ namespace FocusDimmer
         public ObservableCollection<MonitorProfile> MonitorProfiles { get; set; } = new();
         public LocalizationService Strings { get; set; } = new LocalizationService();
 
-        public string AppVersion { get; private set; }
+        // Global Presets (bound to UI)
+        public ObservableCollection<Preset> GlobalPresets { get; set; } = new();
+        
+        private string _selectedGlobalPresetId = "";
+        public string SelectedGlobalPresetId 
+        { 
+            get => _selectedGlobalPresetId; 
+            set 
+            { 
+                _selectedGlobalPresetId = value; 
+                NotifyPropertyChanged();
+                NotifyPropertyChanged(nameof(SelectedGlobalPreset));
+            } 
+        }
+        
+        public Preset? SelectedGlobalPreset => GlobalPresets.FirstOrDefault(p => p.Id == SelectedGlobalPresetId);
+        
+        private string _defaultPresetId = "";
+        public string DefaultPresetId
+        {
+            get => _defaultPresetId;
+            set
+            {
+                _defaultPresetId = value;
+                NotifyPropertyChanged();
+                // Force check for UI update of "(Default)" label
+                NotifyPropertyChanged(nameof(GlobalPresets)); // Or handle it via item property notification if needed
+                // A simpler way is to just refresh the list or binding, but for now property change is enough if we bind correctly
+            }
+        }
+        
+        // --- Global Exclusion Lists ---
+        public string IgnoreList
+        {
+            get => _appSettings.IgnoreList;
+            set { _appSettings.IgnoreList = value; NotifyPropertyChanged(); RequestSave(); }
+        }
+
+        public string AlwaysBrightList
+        {
+            get => _appSettings.AlwaysBrightList;
+            set { _appSettings.AlwaysBrightList = value; NotifyPropertyChanged(); RequestSave(); }
+        }
+
+        public string AlwaysDarkList
+        {
+            get => _appSettings.AlwaysDarkList;
+            set { _appSettings.AlwaysDarkList = value; NotifyPropertyChanged(); RequestSave(); }
+        }
+        
+        public ICommand? SetAsDefaultCommand { get; private set; }
+
+        public string AppVersion { get; private set; } = "";
 
         private int _selectedLanguageIndex;
         public int SelectedLanguageIndex
@@ -126,17 +192,18 @@ namespace FocusDimmer
         }
 
         private List<DimmerOverlay> _overlays = new();
-        private WinForms.NotifyIcon _notifyIcon;
-        private DispatcherTimer _monitorTimer;
+        private WinForms.NotifyIcon? _notifyIcon;
+        private DispatcherTimer? _monitorTimer;
         private bool _isDimmerEnabled = true;
         private bool _reallyExit = false;
-        private AppSettings _appSettings;
+        private AppSettings _appSettings = new();
 
-        private static Mutex _mutex;
+        private static Mutex? _mutex;
         private bool _isInitialized = false;
+        private bool _isApplyingPreset = false;
 
-        private DispatcherTimer _saveTimer;
-        private string _settingsPath;
+        private DispatcherTimer? _saveTimer;
+        private string _settingsPath = "";
 
         private Dictionary<string, (int modifier, int key, int id)> _hotkeys = new()
         {
@@ -144,11 +211,14 @@ namespace FocusDimmer
             { "Darker",  (3, 0x21, 9001) },
             { "Lighter", (3, 0x22, 9002) }
         };
-        private TextBox _focusingHotkeyBox = null;
+        private TextBox? _focusingHotkeyBox = null;
         private bool _ignoreAutoStartEvents = false;
-        private DebugInspector _debugInspector;
+        private DebugInspector? _debugInspector;
 
 
+        private DispatcherTimer? _activeProcessCheckTimer;
+        private string _lastActiveProcessName = "";
+        
         public MainWindow()
         {
             bool createdNew;
@@ -162,6 +232,36 @@ namespace FocusDimmer
 
             InitializeComponent();
             DataContext = this;
+            
+            SetAsDefaultCommand = new RelayCommand(_ => {
+                if (!string.IsNullOrEmpty(SelectedGlobalPresetId))
+                {
+                    DefaultPresetId = SelectedGlobalPresetId;
+                    _appSettings.DefaultPresetId = DefaultPresetId;
+                    RequestSave();
+                }
+            });
+            RenamePresetCommand = new RelayCommand(p => {
+                if (p is Preset preset) RenamePreset(preset);
+            });
+
+            RemoveProcessRuleCommand = new RelayCommand(param => 
+            {
+                if (param is Models.ProcessPresetRule rule && SelectedGlobalPreset != null)
+                {
+                    SelectedGlobalPreset.ProcessRules.Remove(rule);
+                    _appSettings.Presets = new System.Collections.Generic.List<Models.Preset>(GlobalPresets);
+                    RequestSave();
+                }
+            });
+
+            // ... (existing initialization) ...
+
+            // Initialize Active Process Check Timer
+            _activeProcessCheckTimer = new DispatcherTimer();
+            _activeProcessCheckTimer.Interval = TimeSpan.FromMilliseconds(500);
+            _activeProcessCheckTimer.Tick += ActiveProcessCheckTimer_Tick;
+            _activeProcessCheckTimer.Start();
 
             // Title will be updated after store check
 
@@ -197,6 +297,16 @@ namespace FocusDimmer
             }
             
             _appSettings = LoadSettings();
+            GlobalPresets.Clear();
+            if (_appSettings.Presets != null) foreach (var p in _appSettings.Presets) GlobalPresets.Add(p);
+            
+            SelectedGlobalPresetId = _appSettings.SelectedPresetId;
+            DefaultPresetId = _appSettings.DefaultPresetId;
+            
+            // Notify exclusion lists
+            NotifyPropertyChanged(nameof(IgnoreList));
+            NotifyPropertyChanged(nameof(AlwaysBrightList));
+            NotifyPropertyChanged(nameof(AlwaysDarkList));
             
             // Restore Window Size/Position
             if (_appSettings.WindowWidth > 0 && _appSettings.WindowHeight > 0)
@@ -230,61 +340,73 @@ namespace FocusDimmer
 
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
-            this.Loaded += async (s, e) =>
-            {
+            // Initialization moved to InitializeAppAsync
+            InitializeAppAsync();
+        }
+
+        private async void InitializeAppAsync()
+        {
 #if DEBUG
-                // デバッグ時は構成に応じて状態を強制設定
+            // デバッグ時は構成に応じて状態を強制設定
 #if LEGACY_PRO
-                IsPro = true;
+            IsPro = true;
 #elif PRO_VERSION
-                IsPro = true;
+            IsPro = true;
 #else
-                // DEBUGでもレガシー検出ロジックをテストするために呼び出す
-                if (await _storeService.InitializeAsync(_appSettings))
-                {
-                    SaveSettingsActual();
-                }
-                IsPro = _storeService.IsPro; 
+            // DEBUGでもレガシー検出ロジックをテストするために呼び出す
+            if (await _storeService.InitializeAsync(_appSettings))
+            {
+                SaveSettingsActual();
+            }
+            IsPro = _storeService.IsPro; 
 #endif
 #else
-                // リリース時はストア通信を行う
+            // リリース時はストア通信を行う
 #if PRO_VERSION
-                IsPro = true;
+            IsPro = true;
 #else
-                if (await _storeService.InitializeAsync(_appSettings))
-                {
-                    SaveSettingsActual();
-                }
-                IsPro = _storeService.IsPro;
+            if (await _storeService.InitializeAsync(_appSettings))
+            {
+                SaveSettingsActual();
+            }
+            IsPro = _storeService.IsPro;
 #endif
 #endif
-                NotifyPropertyChanged(nameof(Strings));
+            NotifyPropertyChanged(nameof(Strings));
 
-                InitializeMonitors();
+            InitializeMonitors();
 
-                // フリー版の場合は必ずメインモニターを選択状態にする。
-                // Pro版でも、何も選択されていない状態(不具合)を防ぐため、デフォルトで0番目を選択する。
-                if (MonitorTabs.Items.Count > 0)
+            // フリー版の場合は必ずメインモニターを選択状態にする。
+            // Pro版でも、何も選択されていない状態(不具合)を防ぐため、デフォルトで0番目を選択する。
+            if (MonitorTabs.Items.Count > 0)
+            {
+                // フリー版は強制的に0(Primary)に戻す
+                if (IsFreeVersion)
                 {
-                    // フリー版は強制的に0(Primary)に戻す
-                    if (IsFreeVersion)
-                    {
-                        MonitorTabs.SelectedIndex = 0;
-                    }
-                    // 何も選択されていない場合は0を選択
-                    else if (MonitorTabs.SelectedIndex < 0)
-                    {
-                        MonitorTabs.SelectedIndex = 0;
-                    }
+                    MonitorTabs.SelectedIndex = 0;
                 }
+                // 何も選択されていない場合は0を選択
+                else if (MonitorTabs.SelectedIndex < 0)
+                {
+                    MonitorTabs.SelectedIndex = 0;
+                }
+            }
 
-                RegisterAllHotkeys();
-                _isInitialized = true;
+            RegisterAllHotkeys();
+            _isInitialized = true;
 
-                // Async startup check
-                _ignoreAutoStartEvents = true;
-                AutoStartCheck.IsChecked = await StartupManager.IsStartupEnabledAsync();
-                _ignoreAutoStartEvents = false;
+            // Async startup check
+            _ignoreAutoStartEvents = true;
+            AutoStartCheck.IsChecked = await StartupManager.IsStartupEnabledAsync();
+            _ignoreAutoStartEvents = false;
+
+            ApplyAccentColorFix();
+            SystemEvents.UserPreferenceChanged += (ss, ee) =>
+            {
+                if (ee.Category == UserPreferenceCategory.General || ee.Category == UserPreferenceCategory.Color)
+                {
+                    ApplyAccentColorFix();
+                }
             };
 
             _monitorTimer = new DispatcherTimer();
@@ -310,13 +432,54 @@ namespace FocusDimmer
 
                 if (IsFreeVersion) profile.OverlayColorHex = "#000000";
 
-                profile.PropertyChanged += (s, e) => RequestSave();
+                profile.PropertyChanged += (s, e) => 
+                {
+                    if (s is MonitorProfile mp && e.PropertyName != null)
+                    {
+                        SyncProfileToPreset(mp, e.PropertyName);
+                    }
+                    RequestSave();
+                };
 
                 MonitorProfiles.Add(profile);
                 var overlay = new DimmerOverlay(profile);
                 _overlays.Add(overlay);
                 overlay.Show();
             }
+            
+            // Load global presets
+            // Capture current selection to restore later
+            string targetId = _appSettings.SelectedPresetId ?? SelectedGlobalPresetId;
+            
+            GlobalPresets.Clear();
+            if (_appSettings.Presets != null)
+            {
+                foreach (var preset in _appSettings.Presets)
+                {
+                    GlobalPresets.Add(preset);
+                }
+            }
+
+            // Restore selection logic
+            if (!GlobalPresets.Any(p => p.Id == targetId))
+            {
+                // Fallback 1: Default Preset
+                if (!string.IsNullOrEmpty(DefaultPresetId) && GlobalPresets.Any(p => p.Id == DefaultPresetId))
+                {
+                    targetId = DefaultPresetId;
+                }
+                // Fallback 2: First available
+                else if (GlobalPresets.Count > 0)
+                {
+                    targetId = GlobalPresets[0].Id;
+                }
+                else
+                {
+                    targetId = "";
+                }
+            }
+            
+            SelectedGlobalPresetId = targetId;
         }
 
         private async void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
@@ -339,12 +502,12 @@ namespace FocusDimmer
 
                 RegisterAllHotkeys();
                 // Ensure state is updated immediately
-                MonitorTimer_Tick(null, null);
+                MonitorTimer_Tick(null, EventArgs.Empty);
             }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-        protected void NotifyPropertyChanged([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        protected void NotifyPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         private void ShowProPromo()
         {
@@ -408,7 +571,7 @@ namespace FocusDimmer
             }
         }
 
-        private void RequestSave() { _saveTimer.Stop(); _saveTimer.Start(); }
+        private void RequestSave() { _saveTimer?.Stop(); _saveTimer?.Start(); }
         private void SaveSettingsActual()
         {
             if (_saveTimer == null) return;
@@ -435,7 +598,14 @@ namespace FocusDimmer
             WindowTop = t,
             // License migration persistence - carry over from existing settings
             IsLegacyMigrated = _appSettings.IsLegacyMigrated,
-            IsLegacyBannerDismissed = _appSettings.IsLegacyBannerDismissed
+            IsLegacyBannerDismissed = _appSettings.IsLegacyBannerDismissed,
+            // Global Presets
+            Presets = new List<Preset>(GlobalPresets),
+            SelectedPresetId = SelectedGlobalPresetId,
+            DefaultPresetId = DefaultPresetId,
+            IgnoreList = IgnoreList,
+            AlwaysBrightList = AlwaysBrightList,
+            AlwaysDarkList = AlwaysDarkList
         };
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = JsonSerializer.Serialize(settings, options);
@@ -443,6 +613,28 @@ namespace FocusDimmer
             }
             catch { }
         }
+
+        private void ApplyAccentColorFix()
+        {
+            try
+            {
+                var accentColor = SystemParameters.WindowGlassColor;
+                var adjustedColor = ColorHelper.EnsureVisibleAccentColor(accentColor);
+                
+                Application.Current.Resources["AccentColor"] = new SolidColorBrush(adjustedColor);
+                Application.Current.Resources["ColorAccent"] = adjustedColor;
+                
+                // Also update hover color slightly brighter
+                ColorToHsv(adjustedColor, out double h, out double s, out double v);
+                var hoverColor = ColorFromHsv(h, s, Math.Min(1.0, v + 0.1));
+                Application.Current.Resources["ColorAccentHover"] = hoverColor;
+                Application.Current.Resources["AccentHover"] = new SolidColorBrush(hoverColor);
+            }
+            catch { }
+        }
+
+        private void ColorToHsv(Color color, out double h, out double s, out double v) => ColorHelper.ColorToHsv(color, out h, out s, out v);
+        private Color ColorFromHsv(double h, double s, double v) => ColorHelper.ColorFromHsv(h, s, v);
         private AppSettings LoadSettings()
         {
             try { if (File.Exists(_settingsPath)) { string json = File.ReadAllText(_settingsPath); return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings(); } } catch { }
@@ -474,7 +666,7 @@ namespace FocusDimmer
         }
         private void AdminRun_Changed(object sender, RoutedEventArgs e) { }
 
-        private System.Windows.Controls.Primitives.ToggleButton _activeInspectorButton;
+        private System.Windows.Controls.Primitives.ToggleButton? _activeInspectorButton;
 
         private void DebugInspector_Click(object sender, RoutedEventArgs e)
         {
@@ -510,13 +702,13 @@ namespace FocusDimmer
                                 switch (dialog.ActionType)
                                 {
                                     case "Ignore":
-                                        AddProcessToList(profile, p => p.IgnoreList, (p, v) => p.IgnoreList = v, data.ProcessName);
+                                        AddProcessToList(p => p.IgnoreList, (p, v) => p.IgnoreList = v, data.ProcessName);
                                         break;
                                     case "Bright":
-                                        AddProcessToList(profile, p => p.AlwaysBrightList, (p, v) => p.AlwaysBrightList = v, data.ProcessName);
+                                        AddProcessToList(p => p.AlwaysBrightList, (p, v) => p.AlwaysBrightList = v, data.ProcessName);
                                         break;
                                     case "Dark":
-                                        AddProcessToList(profile, p => p.AlwaysDarkList, (p, v) => p.AlwaysDarkList = v, data.ProcessName);
+                                        AddProcessToList(p => p.AlwaysDarkList, (p, v) => p.AlwaysDarkList = v, data.ProcessName);
                                         break;
                                 }
                             }
@@ -556,30 +748,26 @@ namespace FocusDimmer
             AddProcessToProfile(sender, p => p.AlwaysDarkList, (p, v) => p.AlwaysDarkList = v);
         }
 
-        private void AddProcessToProfile(object sender, Func<MonitorProfile, string> getter, Action<MonitorProfile, string> setter)
+        private void AddProcessToProfile(object sender, Func<MainWindow, string> getter, Action<MainWindow, string> setter)
         {
-            if (sender is Button btn && btn.DataContext is MonitorProfile profile)
+            var dialog = new ProcessSelectionWindow(Strings, sender as System.Windows.Controls.Button);
+            if (dialog.ShowDialog() == true)
             {
-                var dialog = new ProcessSelectionWindow(Strings, btn);
-                if (dialog.ShowDialog() == true)
-                {
-                    string processName = dialog.SelectedProcessName;
-                    AddProcessToList(profile, getter, setter, processName);
-                }
+                string processName = dialog.SelectedProcessName;
+                AddProcessToList(getter, setter, processName);
             }
         }
 
-        private void AddProcessToList(MonitorProfile profile, Func<MonitorProfile, string> getter, Action<MonitorProfile, string> setter, string processName)
+        private void AddProcessToList(Func<MainWindow, string> getter, Action<MainWindow, string> setter, string processName)
         {
             if (string.IsNullOrEmpty(processName)) return;
 
-            var currentList = getter(profile) ?? "";
+            var currentList = getter(this) ?? "";
             var items = currentList.Split(',').Select(x => x.Trim().ToLower()).ToList();
             if (!items.Contains(processName.ToLower()))
             {
-                if (string.IsNullOrWhiteSpace(currentList)) setter(profile, processName);
-                else setter(profile, currentList.Trim() + ", " + processName);
-                RequestSave();
+                if (string.IsNullOrWhiteSpace(currentList)) setter(this, processName);
+                else setter(this, currentList.Trim() + ", " + processName);
             }
         }
 
@@ -620,7 +808,7 @@ namespace FocusDimmer
             return 0;
         }
 
-        private void MonitorTimer_Tick(object? sender, EventArgs e)
+        private void MonitorTimer_Tick(object? sender, EventArgs? e)
         {
             if (!_isDimmerEnabled)
             {
@@ -650,7 +838,7 @@ namespace FocusDimmer
 
                 bool isMoving = (foregroundWindow != _lastForegroundWindow) || (hasRect && !currentRect.Equals(_lastRectForMotion));
 
-                if (isMoving)
+                if (isMoving && _monitorTimer != null)
                 {
                     _lastRectForMotion = currentRect;
                     _monitorTimer.Interval = TimeSpan.FromMilliseconds(15);
@@ -659,7 +847,7 @@ namespace FocusDimmer
                 else
                 {
                     if (_highSpeedFrames > 0) _highSpeedFrames--;
-                    else if (_monitorTimer.Interval.TotalMilliseconds < 100) _monitorTimer.Interval = TimeSpan.FromMilliseconds(100);
+                    else if (_monitorTimer != null && _monitorTimer.Interval.TotalMilliseconds < 100) _monitorTimer.Interval = TimeSpan.FromMilliseconds(100);
                 }
 
                 if (foregroundWindow != IntPtr.Zero && (!NativeMethods.IsWindowVisible(foregroundWindow) || NativeMethods.IsIconic(foregroundWindow)))
@@ -698,6 +886,40 @@ namespace FocusDimmer
                     if (activeOverlay != null)
                     {
                         isCurrentWindowExcluded = CheckIfExcluded(foregroundWindow, activeOverlay.LinkedProfile);
+                    }
+                }
+
+                // プロセス自動切替: アクティブプロセスに基づいてグローバルプリセットを切り替え
+                if (globalWindowChanged && foregroundWindow != IntPtr.Zero && !isDesktopOrNull)
+                {
+                    NativeMethods.GetWindowThreadProcessId(foregroundWindow, out uint pid);
+                    string activeProcessName = ProcessInfoHelper.GetProcessName(pid);
+                    
+                    // グローバルプリセットからマッチするルールを検索
+                    Preset? matchingPreset = null;
+                    foreach (var preset in GlobalPresets)
+                    {
+                        if (preset.ProcessRules == null) continue;
+                        
+                        var matchingRule = preset.ProcessRules.FirstOrDefault(r => 
+                            r.ProcessName.Equals(activeProcessName, StringComparison.OrdinalIgnoreCase) ||
+                            r.ProcessName.Replace(".exe", "").Equals(activeProcessName, StringComparison.OrdinalIgnoreCase));
+                        
+                        if (matchingRule != null)
+                        {
+                            matchingPreset = preset;
+                            break;
+                        }
+                    }
+                    
+                    // マッチするプリセットがあり、現在選択中でなければ全モニタに適用
+                    if (matchingPreset != null && SelectedGlobalPresetId != matchingPreset.Id)
+                    {
+                        Dispatcher.BeginInvoke(() =>
+                        {
+                            SelectedGlobalPresetId = matchingPreset.Id;
+                            ApplyGlobalPresetToAllMonitors(matchingPreset);
+                        });
                     }
                 }
 
@@ -848,7 +1070,7 @@ namespace FocusDimmer
                 Application.Current.Shutdown();
             }
         }
-        private void MinimizeButton_Click(object sender, RoutedEventArgs e) => this.Hide();
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
         private void CloseButton_Click(object sender, RoutedEventArgs e) => this.Close();
 
         private void HotkeyBox_GotFocus(object sender, RoutedEventArgs e) => _focusingHotkeyBox = sender as TextBox;
@@ -865,7 +1087,9 @@ namespace FocusDimmer
             Key realKey = (e.Key == Key.System) ? e.SystemKey : e.Key;
             textParts.Add(realKey.ToString());
             _focusingHotkeyBox.Text = string.Join(" + ", textParts);
-            string tag = _focusingHotkeyBox.Tag.ToString();
+            string? tag = _focusingHotkeyBox.Tag?.ToString();
+            if (string.IsNullOrEmpty(tag)) return;
+
             int currentId = _hotkeys[tag].id;
             _hotkeys[tag] = (modifiers, KeyInterop.VirtualKeyFromKey(realKey), currentId);
             RegisterAllHotkeys();
@@ -928,5 +1152,425 @@ namespace FocusDimmer
             _notifyIcon.ContextMenuStrip = menu;
             _notifyIcon.DoubleClick += (s, e) => { Show(); ShowInTaskbar = true; WindowState = WindowState.Normal; Activate(); };
         }
+
+        #region Preset Utilities
+
+        private string ShowInputDialog(string prompt, string defaultValue)
+        {
+            // Modern styled input dialog
+            var dialog = new Window
+            {
+                Title = "",
+                Width = 420,
+                Height = 200,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = this,
+                WindowStyle = WindowStyle.None,
+                AllowsTransparency = true,
+                ResizeMode = ResizeMode.NoResize,
+                Background = Brushes.Transparent
+            };
+            
+            // Main container with border
+            var border = new Border
+            {
+                Background = new SolidColorBrush(Color.FromRgb(30, 30, 30)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(60, 60, 60)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(12),
+                Padding = new Thickness(24),
+                Effect = new System.Windows.Media.Effects.DropShadowEffect
+                {
+                    Color = Colors.Black,
+                    BlurRadius = 20,
+                    ShadowDepth = 4,
+                    Opacity = 0.5
+                }
+            };
+            
+            var grid = new Grid();
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            
+            // Title
+            var title = new System.Windows.Controls.TextBlock 
+            { 
+                Text = prompt, 
+                Foreground = Brushes.White,
+                FontSize = 16,
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 0, 20)
+            };
+            Grid.SetRow(title, 0);
+            
+            // TextBox with modern style
+            var textBoxBorder = new Border
+            {
+                Background = new SolidColorBrush(Color.FromRgb(45, 45, 45)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(80, 80, 80)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(2),
+                Margin = new Thickness(0, 0, 0, 24)
+            };
+            var textBox = new TextBox 
+            { 
+                Text = defaultValue, 
+                Background = Brushes.Transparent,
+                Foreground = Brushes.White,
+                BorderThickness = new Thickness(0),
+                Padding = new Thickness(10, 8, 10, 8),
+                FontSize = 14,
+                CaretBrush = Brushes.White
+            };
+            textBoxBorder.Child = textBox;
+            Grid.SetRow(textBoxBorder, 1);
+            
+            // Button panel
+            var buttonPanel = new StackPanel 
+            { 
+                Orientation = System.Windows.Controls.Orientation.Horizontal,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Right
+            };
+            Grid.SetRow(buttonPanel, 3);
+            
+            // Cancel button
+            var cancelBorder = new Border
+            {
+                Background = new SolidColorBrush(Color.FromRgb(55, 55, 55)),
+                CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(20, 10, 20, 10),
+                Margin = new Thickness(0, 0, 10, 0),
+                Cursor = System.Windows.Input.Cursors.Hand
+            };
+            var cancelText = new System.Windows.Controls.TextBlock
+            {
+                Text = Strings.BtnCancel,
+                Foreground = Brushes.White,
+                FontWeight = FontWeights.Medium
+            };
+            cancelBorder.Child = cancelText;
+            cancelBorder.MouseLeftButtonDown += (s, args) => { dialog.DialogResult = false; };
+            cancelBorder.MouseEnter += (s, args) => { cancelBorder.Background = new SolidColorBrush(Color.FromRgb(70, 70, 70)); };
+            cancelBorder.MouseLeave += (s, args) => { cancelBorder.Background = new SolidColorBrush(Color.FromRgb(55, 55, 55)); };
+            
+            // OK button
+            var okBorder = new Border
+            {
+                Background = new SolidColorBrush(Color.FromRgb(96, 205, 255)),
+                CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(24, 10, 24, 10),
+                Cursor = System.Windows.Input.Cursors.Hand
+            };
+            var okText = new System.Windows.Controls.TextBlock
+            {
+                Text = "OK",
+                Foreground = Brushes.Black,
+                FontWeight = FontWeights.SemiBold
+            };
+            okBorder.Child = okText;
+            okBorder.MouseLeftButtonDown += (s, args) => { dialog.DialogResult = true; };
+            okBorder.MouseEnter += (s, args) => { okBorder.Background = new SolidColorBrush(Color.FromRgb(130, 220, 255)); };
+            okBorder.MouseLeave += (s, args) => { okBorder.Background = new SolidColorBrush(Color.FromRgb(96, 205, 255)); };
+            
+            buttonPanel.Children.Add(cancelBorder);
+            buttonPanel.Children.Add(okBorder);
+            
+            grid.Children.Add(title);
+            grid.Children.Add(textBoxBorder);
+            grid.Children.Add(buttonPanel);
+            
+            border.Child = grid;
+            dialog.Content = border;
+            
+            // Allow dragging
+            border.MouseLeftButtonDown += (s, args) => { if (args.LeftButton == System.Windows.Input.MouseButtonState.Pressed) dialog.DragMove(); };
+            
+            dialog.Loaded += (s, args) => { textBox.Focus(); textBox.SelectAll(); };
+            
+            // Handle Enter key
+            textBox.KeyDown += (s, args) => { if (args.Key == Key.Enter) dialog.DialogResult = true; };
+            
+            if (dialog.ShowDialog() == true)
+            {
+                return textBox.Text;
+            }
+            return defaultValue;
+        }
+
+        #endregion
+
+
+        #region Global Preset Management
+
+        private void GlobalPreset_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SelectedGlobalPreset != null)
+            {
+                // Apply preset to all monitors
+                ApplyGlobalPresetToAllMonitors(SelectedGlobalPreset);
+                RequestSave();
+            }
+        }
+
+        private void AddGlobalPreset_Click(object sender, RoutedEventArgs e)
+        {
+            // Create new preset from current settings of primary monitor
+            var primaryProfile = MonitorProfiles.FirstOrDefault();
+            if (primaryProfile == null) return;
+            
+            string name = Strings.NewPresetName;
+            if (GlobalPresets.Count == 0)
+            {
+                name = Strings.DefaultPresetName;
+            }
+            else
+            {
+                name = $"{Strings.NewPresetName} {GlobalPresets.Count + 1}";
+            }
+            
+            var preset = Preset.FromProfile(primaryProfile, name);
+            GlobalPresets.Add(preset);
+            SelectedGlobalPresetId = preset.Id;
+            _appSettings.Presets = new List<Preset>(GlobalPresets);
+            _appSettings.SelectedPresetId = SelectedGlobalPresetId;
+            
+            RequestSave();
+        }
+
+        public ICommand? RenamePresetCommand { get; private set; }
+        public ICommand? RemoveProcessRuleCommand { get; private set; }
+
+        private void EditGlobalPresetName_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedGlobalPreset != null)
+            {
+                RenamePreset(SelectedGlobalPreset);
+            }
+        }
+
+        private void RenamePreset(Preset preset)
+        {
+            string currentName = preset.Name;
+            string newName = ShowInputDialog(Strings.MsgEnterPresetName, currentName);
+            
+            if (!string.IsNullOrWhiteSpace(newName) && newName != currentName)
+            {
+                preset.Name = newName;
+                _appSettings.Presets = new List<Preset>(GlobalPresets);
+                
+                // Force UI refresh
+                var temp = GlobalPresets.ToList();
+                GlobalPresets.Clear();
+                foreach (var p in temp) GlobalPresets.Add(p);
+                SelectedGlobalPresetId = preset.Id;
+                
+                RequestSave();
+            }
+        }
+
+        private void DeleteGlobalPreset_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedGlobalPreset == null) return;
+            
+            var result = System.Windows.MessageBox.Show(
+                Strings.MsgConfirmDeletePreset, 
+                Strings.AppTitle, 
+                MessageBoxButton.YesNo, 
+                MessageBoxImage.Question);
+            
+            if (result == MessageBoxResult.Yes)
+            {
+                var presetToRemove = SelectedGlobalPreset;
+                GlobalPresets.Remove(presetToRemove);
+                
+                if (GlobalPresets.Count > 0)
+                {
+                    SelectedGlobalPresetId = GlobalPresets[0].Id;
+                }
+                else
+                {
+                    SelectedGlobalPresetId = "";
+                }
+                
+                _appSettings.Presets = new List<Preset>(GlobalPresets);
+                _appSettings.SelectedPresetId = SelectedGlobalPresetId;
+                
+                RequestSave();
+            }
+        }
+
+        private void ManageProcessRules_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedGlobalPreset == null)
+            {
+                System.Windows.MessageBox.Show("Please create or select a preset first.", Strings.AppTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            
+            // Open process selection dialog
+            var dialog = new ProcessSelectionWindow(Strings, sender as Button);
+            if (dialog.ShowDialog() == true)
+            {
+                string processName = dialog.SelectedProcessName;
+                if (!string.IsNullOrEmpty(processName))
+                {
+                    // Check if rule already exists
+                    if (!SelectedGlobalPreset.ProcessRules.Any(r => 
+                        r.ProcessName.Equals(processName, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        SelectedGlobalPreset.ProcessRules.Add(new ProcessPresetRule
+                        {
+                            ProcessName = processName,
+                            DisplayName = dialog.SelectedProcessDescription,
+                            PresetId = SelectedGlobalPreset.Id
+                        });
+                        
+                        _appSettings.Presets = new List<Preset>(GlobalPresets);
+                        RequestSave();
+                    }
+                }
+            }
+        }
+
+        private void ApplyGlobalPresetToAllMonitors(Preset preset)
+        {
+            _isApplyingPreset = true;
+            try
+            {
+                foreach (var profile in MonitorProfiles)
+                {
+                    preset.ApplyToProfile(profile);
+                }
+            }
+            finally
+            {
+                _isApplyingPreset = false;
+            }
+        }
+
+        private void SyncProfileToPreset(MonitorProfile profile, string propertyName)
+        {
+            if (_isApplyingPreset || SelectedGlobalPreset == null) return;
+            
+            var preset = SelectedGlobalPreset;
+            
+            switch (propertyName)
+            {
+                case nameof(MonitorProfile.Opacity):
+                    if (preset.Opacity != profile.Opacity) { preset.Opacity = profile.Opacity; PropagateToOtherMonitors(p => p.Opacity = profile.Opacity, profile); }
+                    break;
+                case nameof(MonitorProfile.Margin):
+                    if (preset.Margin != profile.Margin) { preset.Margin = profile.Margin; PropagateToOtherMonitors(p => p.Margin = profile.Margin, profile); }
+                    break;
+                case nameof(MonitorProfile.DelayDarken):
+                    if (preset.DelayDarken != profile.DelayDarken) { preset.DelayDarken = profile.DelayDarken; PropagateToOtherMonitors(p => p.DelayDarken = profile.DelayDarken, profile); }
+                    break;
+                case nameof(MonitorProfile.DurationDarken):
+                    if (preset.DurationDarken != profile.DurationDarken) { preset.DurationDarken = profile.DurationDarken; PropagateToOtherMonitors(p => p.DurationDarken = profile.DurationDarken, profile); }
+                    break;
+                case nameof(MonitorProfile.DurationBrighten):
+                    if (preset.DurationBrighten != profile.DurationBrighten) { preset.DurationBrighten = profile.DurationBrighten; PropagateToOtherMonitors(p => p.DurationBrighten = profile.DurationBrighten, profile); }
+                    break;
+                case nameof(MonitorProfile.ExcludeTaskbar):
+                    if (preset.ExcludeTaskbar != profile.ExcludeTaskbar) { preset.ExcludeTaskbar = profile.ExcludeTaskbar; PropagateToOtherMonitors(p => p.ExcludeTaskbar = profile.ExcludeTaskbar, profile); }
+                    break;
+                case nameof(MonitorProfile.ExcludeTopmost):
+                    if (preset.ExcludeTopmost != profile.ExcludeTopmost) { preset.ExcludeTopmost = profile.ExcludeTopmost; PropagateToOtherMonitors(p => p.ExcludeTopmost = profile.ExcludeTopmost, profile); }
+                    break;
+                case nameof(MonitorProfile.UseTightFrame):
+                    if (preset.UseTightFrame != profile.UseTightFrame) { preset.UseTightFrame = profile.UseTightFrame; PropagateToOtherMonitors(p => p.UseTightFrame = profile.UseTightFrame, profile); }
+                    break;
+                case nameof(MonitorProfile.DimEntirelyWhenInactive):
+                    if (preset.DimEntirelyWhenInactive != profile.DimEntirelyWhenInactive) { preset.DimEntirelyWhenInactive = profile.DimEntirelyWhenInactive; PropagateToOtherMonitors(p => p.DimEntirelyWhenInactive = profile.DimEntirelyWhenInactive, profile); }
+                    break;
+                case nameof(MonitorProfile.DimDesktopOnly):
+                    if (preset.DimDesktopOnly != profile.DimDesktopOnly) { preset.DimDesktopOnly = profile.DimDesktopOnly; PropagateToOtherMonitors(p => p.DimDesktopOnly = profile.DimDesktopOnly, profile); }
+                    break;
+                case nameof(MonitorProfile.DimWhenIdle):
+                    if (preset.DimWhenIdle != profile.DimWhenIdle) { preset.DimWhenIdle = profile.DimWhenIdle; PropagateToOtherMonitors(p => p.DimWhenIdle = profile.DimWhenIdle, profile); }
+                    break;
+                case nameof(MonitorProfile.IdleTimeout):
+                    if (preset.IdleTimeout != profile.IdleTimeout) { preset.IdleTimeout = profile.IdleTimeout; PropagateToOtherMonitors(p => p.IdleTimeout = profile.IdleTimeout, profile); }
+                    break;
+                case nameof(MonitorProfile.IdleDimOpacity):
+                    if (preset.IdleDimOpacity != profile.IdleDimOpacity) { preset.IdleDimOpacity = profile.IdleDimOpacity; PropagateToOtherMonitors(p => p.IdleDimOpacity = profile.IdleDimOpacity, profile); }
+                    break;
+                case nameof(MonitorProfile.OverlayColorHex):
+                    if (preset.OverlayColorHex != profile.OverlayColorHex) { preset.OverlayColorHex = profile.OverlayColorHex; PropagateToOtherMonitors(p => p.OverlayColorHex = profile.OverlayColorHex, profile); }
+                    break;
+            }
+        }
+
+        private void PropagateToOtherMonitors(Action<MonitorProfile> action, MonitorProfile sourceProfile)
+        {
+            _isApplyingPreset = true;
+            try
+            {
+                foreach (var p in MonitorProfiles)
+                {
+                    if (p != sourceProfile)
+                    {
+                        action(p);
+                    }
+                }
+            }
+            finally
+            {
+                _isApplyingPreset = false;
+            }
+        }
+
+        #endregion
+        private void ActiveProcessCheckTimer_Tick(object? sender, EventArgs e)
+        {
+             if (!_isDimmerEnabled || GlobalPresets.Count == 0 || !IsPro) return;
+
+            IntPtr hwnd = NativeMethods.GetForegroundWindow();
+            if (hwnd == IntPtr.Zero) return;
+
+            NativeMethods.GetWindowThreadProcessId(hwnd, out uint pid);
+            string processName = ProcessInfoHelper.GetProcessName(pid);
+
+            if (string.IsNullOrEmpty(processName)) return;
+
+            // If process changed or we haven't checked recently
+            if (_lastActiveProcessName != processName)
+            {
+                _lastActiveProcessName = processName;
+                
+                // Find matching preset
+                // Priority: First found match
+                Preset? matchedPreset = null;
+                foreach (var preset in GlobalPresets)
+                {
+                    if (preset.ProcessRules.Any(r => r.ProcessName.Equals(processName, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        matchedPreset = preset;
+                        break;
+                    }
+                }
+
+                if (matchedPreset != null)
+                {
+                    if (matchedPreset.Id != SelectedGlobalPresetId)
+                    {
+                        // Switch to matched preset
+                        SelectedGlobalPresetId = matchedPreset.Id;
+                    }
+                }
+                else
+                {
+                    // No match found -> Revert to Default Preset if set
+                    if (!string.IsNullOrEmpty(DefaultPresetId) && DefaultPresetId != SelectedGlobalPresetId && GlobalPresets.Any(p => p.Id == DefaultPresetId))
+                    {
+                        SelectedGlobalPresetId = DefaultPresetId;
+                    }
+                }
+            }
+        }
+
     }
 }

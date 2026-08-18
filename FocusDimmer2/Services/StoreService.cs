@@ -12,8 +12,8 @@ namespace FocusDimmer.Services
 {
     public class StoreService
     {
-        private StoreContext _context;
-        private StoreAppLicense _appLicense;
+        private StoreContext? _context;
+        private StoreAppLicense? _appLicense;
         private const string ProUpgradeAddOnId = "9MWHG48NMCV0";
         private const string LegacyProPFN = "sanmiri.FocusDimmer_p3b9zhm3nac6p";
 
@@ -88,13 +88,16 @@ namespace FocusDimmer.Services
                     }
                 }
 
-                // アドオン購入状態のチェック
-                _appLicense = await _context.GetAppLicenseAsync();
-                
-                // Add-on licenses are in the AddOnLicenses collection
-                if (_appLicense.AddOnLicenses.TryGetValue(ProUpgradeAddOnId, out var license) && license.IsActive)
+                if (_context != null)
                 {
-                    _isProSubscribed = true;
+                    // アドオン購入状態のチェック
+                    _appLicense = await _context.GetAppLicenseAsync();
+
+                    // Add-on licenses are in the AddOnLicenses collection
+                    if (_appLicense != null && _appLicense.AddOnLicenses.TryGetValue(ProUpgradeAddOnId, out var license) && license.IsActive)
+                    {
+                        _isProSubscribed = true;
+                    }
                 }
             }
             catch (Exception)
@@ -145,7 +148,7 @@ namespace FocusDimmer.Services
 
 
 
-        public async Task<(StorePurchaseStatus Status, Exception Error)> RequestPurchaseAsync(IntPtr windowHandle)
+        public async Task<(StorePurchaseStatus Status, Exception? Error)> RequestPurchaseAsync(IntPtr windowHandle)
         {
             if (!IsPackaged() || _context == null) return (StorePurchaseStatus.ServerError, new Exception("Context or Package missing"));
 

@@ -4,7 +4,7 @@ using FocusDimmer.Helpers;
 
 namespace FocusDimmer.Views
 {
-    public partial class MigrationGuideWindow : Window
+    public partial class MigrationGuideWindow : Components.FluentWindow
     {
         private Services.LocalizationService _strings;
         private const string UnifiedAppId = "9NXHXPNJL79X";
@@ -17,9 +17,6 @@ namespace FocusDimmer.Views
             InitializeComponent();
             _strings = strings;
             DataContext = this;
-            
-            // Allow dragging
-            MouseLeftButtonDown += (s, e) => DragMove();
         }
 
         private void OpenStore_Click(object sender, RoutedEventArgs e)

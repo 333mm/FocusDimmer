@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
@@ -8,9 +9,9 @@ namespace FocusDimmer.Models
 {
     public class MonitorProfile : INotifyPropertyChanged
     {
-        [JsonIgnore] public string MonitorName { get; private set; }
-        public string DeviceName { get; set; }
-        [JsonIgnore] public WinForms.Screen ScreenRef { get; private set; }
+        [JsonIgnore] public string MonitorName { get; private set; } = "";
+        public string DeviceName { get; set; } = "";
+        [JsonIgnore] public WinForms.Screen? ScreenRef { get; private set; }
 
         private double _opacity = 65; public double Opacity { get => _opacity; set { _opacity = value; NotifyPropertyChanged(); } }
         private double _margin = 0; public double Margin { get => _margin; set { _margin = value; NotifyPropertyChanged(); } }
@@ -114,6 +115,6 @@ namespace FocusDimmer.Models
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-        protected void NotifyPropertyChanged([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        public void NotifyPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

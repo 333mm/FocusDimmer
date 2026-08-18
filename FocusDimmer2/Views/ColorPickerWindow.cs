@@ -16,7 +16,7 @@ using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 
 namespace FocusDimmer.Views
 {
-    public partial class ColorPickerWindow : Window, INotifyPropertyChanged
+    public partial class ColorPickerWindow : Components.FluentWindow, INotifyPropertyChanged
     {
         public Color SelectedColor { get; private set; }
 
@@ -48,7 +48,7 @@ namespace FocusDimmer.Views
         private byte _g; public byte G { get => _g; set { if (_g != value) { _g = value; OnRGBChanged(); NotifyPropertyChanged(); } } }
         private byte _b; public byte B { get => _b; set { if (_b != value) { _b = value; OnRGBChanged(); NotifyPropertyChanged(); } } }
 
-        private string _hexString;
+        private string _hexString = "";
         public string HexString 
         { 
             get => _hexString; 
@@ -210,7 +210,7 @@ namespace FocusDimmer.Views
         private void OkButton_Click(object sender, RoutedEventArgs e) { DialogResult = true; Close(); }
         private void CloseButton_Click(object sender, RoutedEventArgs e) { DialogResult = false; Close(); }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void NotifyPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

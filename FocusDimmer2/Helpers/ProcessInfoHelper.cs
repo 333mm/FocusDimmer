@@ -9,7 +9,7 @@ namespace FocusDimmer.Helpers
         public static string GetProcessName(uint pid)
         {
             if (pid == 0) return "";
-            if (_pidCache.TryGetValue(pid, out string cachedName)) return cachedName;
+            if (_pidCache.TryGetValue(pid, out string? cachedName)) return cachedName ?? "";
             
             // Limit cache size
             if (_pidCache.Count > 1000) _pidCache.Clear();

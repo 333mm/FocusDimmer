@@ -14,7 +14,7 @@ namespace FocusDimmer.Helpers
     public class DebugInspector
     {
         private DispatcherTimer _timer;
-        private DebugInspectorWindow _window;
+        private DebugInspectorWindow? _window;
         private LocalizationService _strings;
         private bool _isTracking;
 
@@ -26,12 +26,12 @@ namespace FocusDimmer.Helpers
             _timer.Tick += Timer_Tick;
         }
 
-        public event EventHandler StopRequested;
-        public event EventHandler<WindowData> SelectedWindowCaptured;
+        public event EventHandler? StopRequested;
+        public event EventHandler<WindowData>? SelectedWindowCaptured;
         
         private IntPtr _hwndSelf;
         private IntPtr _hookId = IntPtr.Zero;
-        private NativeMethods.LowLevelMouseProc _mouseProc;
+        private NativeMethods.LowLevelMouseProc? _mouseProc;
         private List<WindowData> _currentWindows = new();
         private bool _isSelectionMode = false;
 
@@ -105,8 +105,9 @@ namespace FocusDimmer.Helpers
                         _hookId = IntPtr.Zero;
                     }
                     
-                    _window.Dispatcher.Invoke(() => 
+                    _window?.Dispatcher.Invoke(() => 
                     {
+                        if (_window == null) return;
                         _window.UpdateStatus(GetString("DebugStatusSelect"));
                         _window.IsHitTestVisible = true;
                         _window.Topmost = true;
@@ -119,7 +120,7 @@ namespace FocusDimmer.Helpers
             return NativeMethods.CallNextHookEx(_hookId, nCode, wParam, lParam);
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
+        private void Timer_Tick(object? sender, EventArgs e)
         {
             if (_window == null || _isSelectionMode) return;
             
@@ -135,6 +136,7 @@ namespace FocusDimmer.Helpers
 
         private void UpdateInspection()
         {
+            if (_window == null) return;
             if (!NativeMethods.GetCursorPos(out NativeMethods.POINT pt)) return;
 
             // DPI Handling

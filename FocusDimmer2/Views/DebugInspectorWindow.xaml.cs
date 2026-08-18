@@ -6,19 +6,19 @@ namespace FocusDimmer.Views
     {
         public int Index { get; set; }
         public IntPtr Hwnd { get; set; }
-        public string ProcessName { get; set; }
-        public string Title { get; set; }
-        public string ClassName { get; set; }
-        public string RectString { get; set; }
-        public string Flags { get; set; }
+        public string ProcessName { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string ClassName { get; set; } = "";
+        public string RectString { get; set; } = "";
+        public string Flags { get; set; } = "";
 
         public string DisplayHeader => $"[{Index}] {ProcessName}";
         public string DisplayDetails => $"Title: {Title}\nClass: {ClassName}\nRect: {RectString}\nFlags: {Flags}";
     }
 
-    public partial class DebugInspectorWindow : Window
+    public partial class DebugInspectorWindow : Components.FluentWindow
     {
-        public event EventHandler<WindowData> WindowSelected;
+        public event EventHandler<WindowData>? WindowSelected;
 
         public DebugInspectorWindow()
         {

@@ -22,6 +22,17 @@ namespace FocusDimmer.Services
         public const int DWMWA_CLOAKED = 14;
         public const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
         public const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+        public const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+        public const int DWMWA_MICA_EFFECT = 1029;
+        public const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
+
+        public const int DWMWCP_ROUND = 2;
+
+        public const int DWMSBT_AUTO = 0;
+        public const int DWMSBT_NONE = 1;
+        public const int DWMSBT_MAINWINDOW = 2;      // Mica
+        public const int DWMSBT_TRANSIENTWINDOW = 3; // Acrylic
+        public const int DWMSBT_TABBEDWINDOW = 4;    // Mica Alt
 
         [StructLayout(LayoutKind.Sequential)]
         public struct RECT
@@ -76,7 +87,7 @@ namespace FocusDimmer.Services
         [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr hWnd);
         [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
         [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-        [DllImport("user32.dll")] public static extern IntPtr FindWindow(string c, string n);
+        [DllImport("user32.dll")] public static extern IntPtr FindWindow(string? c, string? n);
         [DllImport("user32.dll")] public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
         [DllImport("user32.dll")] public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
         [DllImport("user32.dll")] public static extern int GetWindowTextLength(IntPtr hWnd);
@@ -123,6 +134,17 @@ namespace FocusDimmer.Services
             int result = DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, out rect, Marshal.SizeOf(typeof(RECT)));
             return result == 0;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MARGINS
+        {
+            public int cxLeftWidth;
+            public int cxRightWidth;
+            public int cyTopHeight;
+            public int cyBottomHeight;
+        }
+
+        [DllImport("dwmapi.dll")] public static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref MARGINS pMarInset);
 
         [DllImport("dwmapi.dll")] public static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
         

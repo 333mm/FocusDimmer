@@ -15,17 +15,19 @@ namespace FocusDimmer
     {
         public string Name { get; set; } = "";
         public string ProcessName { get; set; } = "";
+        public string Description { get; set; } = "";
         public BitmapSource? Icon { get; set; }
     }
 
-    public partial class ProcessSelectionWindow : Window
+    public partial class ProcessSelectionWindow : Components.FluentWindow
     {
         public FocusDimmer.Services.LocalizationService Strings { get; }
-        public string SelectedProcessName { get; private set; }
-        private List<ProcessItem> _allProcesses;
-        private System.Windows.Controls.Button _anchorButton;
+        public string SelectedProcessName { get; private set; } = "";
+        public string SelectedProcessDescription { get; private set; } = "";
+        private List<ProcessItem> _allProcesses = new();
+        private System.Windows.Controls.Button? _anchorButton;
 
-        public ProcessSelectionWindow(FocusDimmer.Services.LocalizationService strings, System.Windows.Controls.Button anchorButton)
+        public ProcessSelectionWindow(FocusDimmer.Services.LocalizationService strings, System.Windows.Controls.Button? anchorButton)
         {
             Strings = strings;
             _anchorButton = anchorButton;
@@ -103,10 +105,23 @@ namespace FocusDimmer
                     if (string.IsNullOrWhiteSpace(p.MainWindowTitle)) continue;
 
                     var icon = GetIcon(p);
+                    string description = "";
+                    try
+                    {
+                        if (p.MainModule?.FileVersionInfo != null)
+                        {
+                            description = p.MainModule.FileVersionInfo.FileDescription ?? "";
+                        }
+                    }
+                    catch { }
+
+                    if (string.IsNullOrEmpty(description)) description = p.ProcessName;
+
                     _allProcesses.Add(new ProcessItem
                     {
                         Name = p.MainWindowTitle,
                         ProcessName = p.ProcessName,
+                        Description = description,
                         Icon = icon
                     });
                 }
@@ -200,6 +215,7 @@ namespace FocusDimmer
             if (ProcessList.SelectedItem is ProcessItem item)
             {
                 SelectedProcessName = item.ProcessName.ToLower();
+                SelectedProcessDescription = item.Description;
                 DialogResult = true;
                 Close();
             }
@@ -253,6 +269,15 @@ namespace FocusDimmer
                             if (System.IO.File.Exists(path))
                             {
                                 SelectedProcessName = System.IO.Path.GetFileNameWithoutExtension(path).ToLower();
+                                try 
+                                {
+                                    var info = FileVersionInfo.GetVersionInfo(path);
+                                    SelectedProcessDescription = info.FileDescription ?? SelectedProcessName;
+                                }
+                                catch 
+                                {
+                                    SelectedProcessDescription = SelectedProcessName;
+                                }
                                 DialogResult = true;
                                 Close();
                             }

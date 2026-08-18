@@ -11,6 +11,9 @@ namespace FocusDimmer.Services
     public class LocalizationService : INotifyPropertyChanged
     {
         public string AppTitle { get; set; } = "Focus Dimmer";
+        public string HeaderGlobalSettings { get; set; } = "Global Settings";
+        public string SubHeaderGlobalSettings { get; set; } = "These settings apply to all connected monitors.";
+        public string BadgeAllMonitors { get; set; } = "ALL MONITORS";
         public string HeaderOverlay { get; set; } = "OVERLAY SETTINGS";
         public string CheckDimEntirely { get; set; } = "Dim entire monitor when inactive";
         public string TooltipDimEntirely { get; set; } = "Prioritized over other brightness options.";
@@ -82,8 +85,25 @@ namespace FocusDimmer.Services
         public string DebugStandardWindow { get; set; } = "Standard window - check if in Always Bright/Dark list";
         public string DebugAddToDarkList { get; set; } = "Add '{0}' to Always Dark list to dim this window.";
         
+        // Preset strings
+        public string HeaderPreset { get; set; } = "PRESETS";
+        public string TooltipEditPreset { get; set; } = "Edit preset name";
+        public string TooltipAddPreset { get; set; } = "Save current settings as new preset";
+        public string TooltipDeletePreset { get; set; } = "Delete selected preset";
+        public string LabelProcessSwitch { get; set; } = "Auto-switch when process is active:";
+        public string LabelAssociatedProcesses { get; set; } = "Associated Processes:";
+        public string BtnAddProcessRule { get; set; } = "Add Process Rule";
+        public string DefaultPresetName { get; set; } = "Default";
+        public string NewPresetName { get; set; } = "New Preset";
+        public string MsgConfirmDeletePreset { get; set; } = "Delete this preset?";
+        public string MsgEnterPresetName { get; set; } = "Enter preset name:";
+        public string TooltipDebugInspector { get; set; } = "Debug window inspector";
+        public string LabelDefault { get; set; } = "(Default)";
+        public string TooltipSetAsDefault { get; set; } = "Set as Default Preset";
+        public string MenuRename { get; set; } = "Rename";
+        
         // Indexer for accessing properties by string name
-        public string this[string propertyName]
+        public string? this[string propertyName]
         {
             get
             {
@@ -122,6 +142,9 @@ namespace FocusDimmer.Services
         private void SetDefaultEnglish()
         {
             AppTitle = "Focus Dimmer";
+            HeaderGlobalSettings = "Global Settings";
+            SubHeaderGlobalSettings = "These settings apply to all connected monitors.";
+            BadgeAllMonitors = "ALL MONITORS";
             HeaderOverlay = "OVERLAY SETTINGS";
             CheckDimEntirely = "Dim entire monitor when inactive";
             TooltipDimEntirely = "Prioritized over other brightness options.";
@@ -174,10 +197,30 @@ namespace FocusDimmer.Services
             BtnAddDark = "Add to Always Dark List";
             DebugStatusClick = "Click to freeze";
             DebugStatusSelect = "Select from the list";
+            
+            // Preset strings
+            HeaderPreset = "PRESETS";
+            TooltipEditPreset = "Edit preset name";
+            TooltipAddPreset = "Save current settings as new preset";
+            TooltipDeletePreset = "Delete selected preset";
+            LabelProcessSwitch = "Auto-switch when process is active:";
+            LabelAssociatedProcesses = "Associated Processes:";
+            BtnAddProcessRule = "Add Process Rule";
+            DefaultPresetName = "Default";
+            NewPresetName = "New Preset";
+            MsgConfirmDeletePreset = "Delete this preset?";
+            MsgEnterPresetName = "Enter preset name:";
+            TooltipDebugInspector = "Debug window inspector";
+            LabelDefault = "(Default)";
+            TooltipSetAsDefault = "Set as Default Preset";
+            MenuRename = "Rename";
         }
         private void SetDefaultJapanese()
         {
             AppTitle = "Focus Dimmer";
+            HeaderGlobalSettings = "共通設定";
+            SubHeaderGlobalSettings = "これらの設定はすべてのモニターに適用されます。";
+            BadgeAllMonitors = "モニター共通";
             HeaderOverlay = "オーバーレイ設定";
             CheckDimEntirely = "このモニタが非アクティブ時は全体を暗くする";
             TooltipDimEntirely = "他の明るくなるオプションより優先されます。";
@@ -230,8 +273,25 @@ namespace FocusDimmer.Services
             BtnAddDark = "常に暗くするリストに追加する";
             DebugStatusClick = "クリックしてフリーズ";
             DebugStatusSelect = "リストから選択してください";
+            
+            // Preset strings (Japanese)
+            HeaderPreset = "プリセット";
+            TooltipEditPreset = "プリセット名を編集";
+            TooltipAddPreset = "現在の設定を新規プリセットとして保存";
+            TooltipDeletePreset = "選択したプリセットを削除";
+            LabelProcessSwitch = "プロセス実行時に自動切替:";
+            LabelAssociatedProcesses = "関連付けられたプロセス:";
+            BtnAddProcessRule = "プロセスルールを追加";
+            DefaultPresetName = "デフォルト";
+            NewPresetName = "新規プリセット";
+            MsgConfirmDeletePreset = "このプリセットを削除しますか？";
+            MsgEnterPresetName = "プリセット名を入力:";
+            TooltipDebugInspector = "デバッグウィンドウ検査";
+            LabelDefault = "(既定)";
+            TooltipSetAsDefault = "既定のプリセットに設定";
+            MenuRename = "名前を変更";
         }
         public event PropertyChangedEventHandler? PropertyChanged;
-        void OnProp([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        void OnProp([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

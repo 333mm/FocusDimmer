@@ -20,12 +20,12 @@ namespace FocusDimmer.Components
     public class DimmerOverlay : IDisposable
     {
         public MonitorProfile LinkedProfile { get; private set; }
-        private Window _window;
-        private Path _path;
-        private SolidColorBrush _brush;
-        private CombinedGeometry _finalGeo;
-        private GeometryGroup _holesGroup;
-        private RectangleGeometry _bgRect;
+        private Window? _window;
+        private Path? _path;
+        private SolidColorBrush? _brush;
+        private CombinedGeometry? _finalGeo;
+        private GeometryGroup? _holesGroup;
+        private RectangleGeometry? _bgRect;
         private IntPtr _myHandle = IntPtr.Zero;
 
         private IntPtr _lastTargetHwnd = IntPtr.Zero;
@@ -58,7 +58,7 @@ namespace FocusDimmer.Components
         private Color _fadeBaseColor;
 
         // Cached animation for StartBreathSequence to prevent handler accumulation
-        private ColorAnimation _breathAnimation;
+        private ColorAnimation? _breathAnimation;
 
         private bool _disposed = false;
 
@@ -74,6 +74,7 @@ namespace FocusDimmer.Components
             _path = new Path { Data = _finalGeo, Fill = _brush };
             RenderOptions.SetEdgeMode(_path, EdgeMode.Aliased);
 
+            var bounds = profile.ScreenRef?.Bounds ?? new System.Drawing.Rectangle(0, 0, 1920, 1080);
             _window = new Window
             {
                 WindowStyle = WindowStyle.None,
@@ -83,21 +84,38 @@ namespace FocusDimmer.Components
                 Topmost = true,
                 Content = _path,
                 IsHitTestVisible = false,
-                Left = profile.ScreenRef.Bounds.Left - 1,
-                Top = profile.ScreenRef.Bounds.Top - 1,
-                Width = profile.ScreenRef.Bounds.Width + 2,
-                Height = profile.ScreenRef.Bounds.Height + 2
+                Left = bounds.Left - 1,
+                Top = bounds.Top - 1,
+                Width = bounds.Width + 2,
+                Height = bounds.Height + 2
             };
 
-            _window.Loaded += (s, e) => {
+            _window.SourceInitialized += (s, e) => {
                 var helper = new WindowInteropHelper(_window);
                 _myHandle = helper.Handle;
                 int exStyle = NativeMethods.GetWindowLong(_myHandle, NativeMethods.GWL_EXSTYLE);
                 NativeMethods.SetWindowLong(_myHandle, NativeMethods.GWL_EXSTYLE, exStyle | NativeMethods.WS_EX_TRANSPARENT | NativeMethods.WS_EX_TOOLWINDOW | NativeMethods.WS_EX_NOACTIVATE);
+                WindowHelper.DisableBackdropAndBlur(_myHandle);
+            };
+
+            _window.Loaded += (s, e) => {
+                if (_myHandle == IntPtr.Zero)
+                {
+                    var helper = new WindowInteropHelper(_window);
+                    _myHandle = helper.Handle;
+                }
+                int exStyle = NativeMethods.GetWindowLong(_myHandle, NativeMethods.GWL_EXSTYLE);
+                NativeMethods.SetWindowLong(_myHandle, NativeMethods.GWL_EXSTYLE, exStyle | NativeMethods.WS_EX_TRANSPARENT | NativeMethods.WS_EX_TOOLWINDOW | NativeMethods.WS_EX_NOACTIVATE);
+                WindowHelper.DisableBackdropAndBlur(_myHandle);
                 UpdateWindowBounds();
             };
 
             LinkedProfile.PropertyChanged += OnProfilePropertyChanged;
+            
+            if (System.Windows.Application.Current?.MainWindow is MainWindow mainWindow)
+            {
+                mainWindow.PropertyChanged += OnMainWindowPropertyChanged;
+            }
 
             _delayTimer = new DispatcherTimer();
             _delayTimer.Tick += DelayTimer_Tick;
@@ -114,9 +132,17 @@ namespace FocusDimmer.Components
                 e.PropertyName == nameof(MonitorProfile.ExcludeTaskbar) ||
                 e.PropertyName == nameof(MonitorProfile.ExcludeTopmost) ||
                 e.PropertyName == nameof(MonitorProfile.UseTightFrame) ||
-                e.PropertyName == nameof(MonitorProfile.AlwaysBrightList) ||
-                e.PropertyName == nameof(MonitorProfile.AlwaysDarkList) ||
                 e.PropertyName == nameof(MonitorProfile.DimDesktopOnly))
+            {
+                InvalidateCache();
+            }
+        }
+
+        private void OnMainWindowPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(MainWindow.AlwaysBrightList) ||
+                e.PropertyName == nameof(MainWindow.AlwaysDarkList) ||
+                e.PropertyName == nameof(MainWindow.IgnoreList))
             {
                 InvalidateCache();
             }
@@ -128,13 +154,18 @@ namespace FocusDimmer.Components
             _disposed = true;
 
             LinkedProfile.PropertyChanged -= OnProfilePropertyChanged;
+            if (System.Windows.Application.Current?.MainWindow is MainWindow mainWindow)
+            {
+                mainWindow.PropertyChanged -= OnMainWindowPropertyChanged;
+            }
             
             _delayTimer?.Stop();
             _fadeTimer?.Stop();
 
             if (_breathAnimation != null)
             {
-                _breathAnimation.Completed -= BreathAnimation_Completed;
+                var anim = _breathAnimation;
+                anim.Completed -= BreathAnimation_Completed;
             }
 
             try
@@ -173,22 +204,24 @@ namespace FocusDimmer.Components
 
         private void UpdateWindowBounds()
         {
-            var source = PresentationSource.FromVisual(_window);
+            var win = _window;
+            if (win == null) return;
+            var source = PresentationSource.FromVisual(win);
             if (source?.CompositionTarget == null) return;
             double scaleX = source.CompositionTarget.TransformToDevice.M11;
             double scaleY = source.CompositionTarget.TransformToDevice.M22;
-            var bounds = LinkedProfile.ScreenRef.Bounds;
+            var bounds = LinkedProfile.ScreenRef?.Bounds ?? new System.Drawing.Rectangle(0, 0, 1920, 1080); // Fix CS8602
 
-            _window.Left = (bounds.Left - 1) / scaleX;
-            _window.Top = (bounds.Top - 1) / scaleY;
-            _window.Width = (bounds.Width + 2) / scaleX;
-            _window.Height = (bounds.Height + 2) / scaleY;
-            _bgRect.Rect = new Rect(0, 0, _window.Width, _window.Height);
+            win.Left = (bounds.Left - 1) / scaleX;
+            win.Top = (bounds.Top - 1) / scaleY;
+            win.Width = (bounds.Width + 2) / scaleX;
+            win.Height = (bounds.Height + 2) / scaleY;
+            if (_bgRect != null) _bgRect.Rect = new Rect(0, 0, win.Width, win.Height);
         }
 
-        public void Show() => _window.Show();
-        public void Close() => _window.Close();
-        public void SetVisibility(bool visible) => _window.Visibility = visible ? Visibility.Visible : Visibility.Hidden;
+        public void Show() => _window?.Show();
+        public void Close() => _window?.Close();
+        public void SetVisibility(bool visible) { if (_window != null) _window.Visibility = visible ? Visibility.Visible : Visibility.Hidden; }
 
         public void InvalidateCache()
         {
@@ -214,8 +247,6 @@ namespace FocusDimmer.Components
 
         private double _lastAppliedOpacity = -1;
         private double _lastAppliedIdleOpacity = -1;
-        private double? _lastAppliedDuration = null;
-
 
 
         public void UpdateState(IntPtr foregroundHwnd, bool shouldDim, bool windowChanged, bool forceNoHoles, bool isIdle)
@@ -243,8 +274,8 @@ namespace FocusDimmer.Components
                             // Fadeout is instant (skip the bright phase)
                             // But still do delay and fade to dark (fade-in)
                             _delayTimer.Stop();
-                            _brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
-                            _brush.Color = Color.FromArgb(0, 0, 0, 0);  // Go transparent instantly
+                            _brush?.BeginAnimation(SolidColorBrush.ColorProperty, null);
+                            if (_brush != null) _brush.Color = Color.FromArgb(0, 0, 0, 0);  // Go transparent instantly
                             
                             // Start delay timer for fade to dark
                             _delayTimer.Interval = TimeSpan.FromSeconds(LinkedProfile.DelayDarken);
@@ -260,8 +291,8 @@ namespace FocusDimmer.Components
                         _delayTimer.Stop();
                         _delayTimer.Interval = TimeSpan.FromSeconds(LinkedProfile.DelayDarken);
                         _delayTimer.Start();
-                        _brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
-                        _brush.Color = Color.FromArgb(0, 0, 0, 0);
+                        _brush?.BeginAnimation(SolidColorBrush.ColorProperty, null);
+                        if (_brush != null) _brush.Color = Color.FromArgb(0, 0, 0, 0);
 
                         if (isIdle)
                         {
@@ -290,13 +321,13 @@ namespace FocusDimmer.Components
                             Duration = new Duration(TimeSpan.FromSeconds(duration)),
                             FillBehavior = FillBehavior.HoldEnd
                         };
-                        _brush.BeginAnimation(SolidColorBrush.ColorProperty, fadeAnim);
+                        _brush?.BeginAnimation(SolidColorBrush.ColorProperty, fadeAnim);
                     }
                     else
                     {
                         // Instant transition
-                        _brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
-                        _brush.Color = Color.FromArgb(0, 0, 0, 0);
+                        _brush?.BeginAnimation(SolidColorBrush.ColorProperty, null);
+                        if (_brush != null) _brush.Color = Color.FromArgb(0, 0, 0, 0);
                     }
                 }
             }
@@ -319,22 +350,21 @@ namespace FocusDimmer.Components
 
                         if (opacityChanged && !windowChanged)
                         {
-                            // Slider moved. Update immediately without animation if possible, or short animation.
+                            // Preset switched or slider moved. Animate smoothly from CURRENT opacity to TARGET opacity.
                             _delayTimer.Stop();
-                            _brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
-                            byte targetAlpha = (byte)(currentTargetOpacity / 100.0 * 255);
-                            var c = GetBaseColor();
-                            _brush.Color = Color.FromArgb(targetAlpha, c.R, c.G, c.B);
+                            double duration = (currentTargetOpacity > lastApplied) ? LinkedProfile.DurationDarken : LinkedProfile.DurationBrighten;
+                            if (duration < 0.2) duration = 0.2; // Minimum duration for smoothness
+                            FadeToDark(duration, currentTargetOpacity);
                         }
                         else if (!skipAnimation)
                         {
                             if (LinkedProfile.DurationBrighten <= 0.05)
                             {
                                 _delayTimer.Stop();
-                                _brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
+                                _brush?.BeginAnimation(SolidColorBrush.ColorProperty, null);
                                 byte targetAlpha = (byte)(currentTargetOpacity / 100.0 * 255);
                                 var c = GetBaseColor();
-                                _brush.Color = Color.FromArgb(targetAlpha, c.R, c.G, c.B);
+                                if (_brush != null) _brush.Color = Color.FromArgb(targetAlpha, c.R, c.G, c.B);
                             }
                             else
                             {
@@ -347,7 +377,7 @@ namespace FocusDimmer.Components
                 {
                     // Already marked as bright, but check if manual fade is running
                     // If not running and brush is still dark, start manual fade
-                    if (!_isFadingToTransparent)
+                    if (!_isFadingToTransparent && _brush != null)
                     {
                         byte currentAlpha = _brush.Color.A;
                         if (currentAlpha > 10)  // Brush is not transparent
@@ -357,7 +387,7 @@ namespace FocusDimmer.Components
                             if (duration > 0.01)
                             {
                                 _delayTimer.Stop();
-                                _brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
+                                _brush?.BeginAnimation(SolidColorBrush.ColorProperty, null);
                                 
                                 _isFadingToTransparent = true;
                                 _fadeStartTime = DateTime.Now;
@@ -368,8 +398,8 @@ namespace FocusDimmer.Components
                             }
                             else
                             {
-                                _brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
-                                _brush.Color = Color.FromArgb(0, 0, 0, 0);
+                                _brush?.BeginAnimation(SolidColorBrush.ColorProperty, null);
+                                if (_brush != null) _brush.Color = Color.FromArgb(0, 0, 0, 0);
                             }
                         }
                     }
@@ -399,7 +429,7 @@ namespace FocusDimmer.Components
                 _breathAnimation.Completed += BreathAnimation_Completed;
             }
             _breathAnimation.Duration = new Duration(TimeSpan.FromSeconds(durationBright));
-            _brush.BeginAnimation(SolidColorBrush.ColorProperty, _breathAnimation);
+            _brush?.BeginAnimation(SolidColorBrush.ColorProperty, _breathAnimation);
         }
 
         private void BreathAnimation_Completed(object? sender, EventArgs e)
@@ -432,7 +462,7 @@ namespace FocusDimmer.Components
 
             
             // Update brush color directly
-            _brush.Color = Color.FromArgb(currentAlpha, _fadeBaseColor.R, _fadeBaseColor.G, _fadeBaseColor.B);
+            if (_brush != null) _brush.Color = Color.FromArgb(currentAlpha, _fadeBaseColor.R, _fadeBaseColor.G, _fadeBaseColor.B);
             
             if (progress >= 1.0)
             {
@@ -440,7 +470,7 @@ namespace FocusDimmer.Components
 
                 _isFadingToTransparent = false;
                 _fadeTimer.Stop();
-                _brush.Color = Color.FromArgb(0, 0, 0, 0);
+                if (_brush != null) _brush.Color = Color.FromArgb(0, 0, 0, 0);
             }
         }
 
@@ -455,7 +485,7 @@ namespace FocusDimmer.Components
                 Duration = new Duration(TimeSpan.FromSeconds(duration)),
                 FillBehavior = FillBehavior.HoldEnd
             };
-            _brush.BeginAnimation(SolidColorBrush.ColorProperty, anim);
+            _brush?.BeginAnimation(SolidColorBrush.ColorProperty, anim);
         }
 
         private void FadeToTransparent(double duration)
@@ -467,19 +497,19 @@ namespace FocusDimmer.Components
                 Duration = new Duration(TimeSpan.FromSeconds(duration)),
                 FillBehavior = FillBehavior.HoldEnd
             };
-            _brush.BeginAnimation(SolidColorBrush.ColorProperty, anim);
+            _brush?.BeginAnimation(SolidColorBrush.ColorProperty, anim);
         }
 
         private void ApplyAppearanceImmediately()
         {
             _delayTimer.Stop();
-            _brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
+            _brush?.BeginAnimation(SolidColorBrush.ColorProperty, null);
             if (_isCurrentlyActiveState)
             {
                 double op = (_wasIdle && LinkedProfile.DimWhenIdle) ? LinkedProfile.IdleDimOpacity : LinkedProfile.Opacity;
                 byte targetAlpha = (byte)(op / 100.0 * 255);
                 var c = GetBaseColor();
-                _brush.Color = Color.FromArgb(targetAlpha, c.R, c.G, c.B);
+                if (_brush != null) _brush.Color = Color.FromArgb(targetAlpha, c.R, c.G, c.B);
             }
         }
 
@@ -570,6 +600,14 @@ namespace FocusDimmer.Components
                 return true;
             }, IntPtr.Zero);
 
+            string currentAlwaysBright = "";
+            string currentAlwaysDark = "";
+            if (System.Windows.Application.Current?.MainWindow is MainWindow mainWindow)
+            {
+                currentAlwaysBright = mainWindow.AlwaysBrightList;
+                currentAlwaysDark = mainWindow.AlwaysDarkList;
+            }
+
             bool isSame = (targetHwnd == _lastTargetHwnd) &&
                           (currentRect.Equals(_lastTargetRect)) &&
                           (_lastMargin == LinkedProfile.Margin) &&
@@ -578,8 +616,8 @@ namespace FocusDimmer.Components
                           (_lastUseTightFrame == LinkedProfile.UseTightFrame) &&
                           (specialWindows.Count == _lastPopupCount) &&
                           (specialWindows.Count > 0 ? specialWindows[0].Equals(_lastSpecialRectSample) : true) &&
-                          (_lastAlwaysBright == LinkedProfile.AlwaysBrightList) &&
-                          (_lastAlwaysDark == LinkedProfile.AlwaysDarkList) &&
+                          (_lastAlwaysBright == currentAlwaysBright) &&
+                          (_lastAlwaysDark == currentAlwaysDark) &&
                           (_lastDimDesktopOnly == LinkedProfile.DimDesktopOnly) &&
                           (_lastForceNoHoles == forceNoHoles) &&
                           _isCacheValid;
@@ -594,20 +632,21 @@ namespace FocusDimmer.Components
             _lastUseTightFrame = LinkedProfile.UseTightFrame;
             _lastPopupCount = specialWindows.Count;
             if (specialWindows.Count > 0) _lastSpecialRectSample = specialWindows[0];
-            _lastAlwaysBright = LinkedProfile.AlwaysBrightList;
-            _lastAlwaysDark = LinkedProfile.AlwaysDarkList;
+            _lastAlwaysBright = currentAlwaysBright;
+            _lastAlwaysDark = currentAlwaysDark;
             _lastDimDesktopOnly = LinkedProfile.DimDesktopOnly;
             _lastForceNoHoles = forceNoHoles;
             _isCacheValid = true;
 
-            _holesGroup.Children.Clear();
+            _holesGroup?.Children.Clear();
 
+            if (_window == null) return;
             var source = PresentationSource.FromVisual(_window);
             if (source?.CompositionTarget == null) return;
             double scaleX = source.CompositionTarget.TransformToDevice.M11;
             double scaleY = source.CompositionTarget.TransformToDevice.M22;
 
-            if (_isCurrentlyActiveState || _brush.Color.A > 0)
+            if (_isCurrentlyActiveState || (_brush != null && _brush.Color.A > 0))
             {
                 // Active Window Hole: Skip if forceNoHoles
                 // FIX: Allow Active Hole even if DimDesktopOnly is true (to ensure active window is always visible)
@@ -650,7 +689,10 @@ namespace FocusDimmer.Components
 
         private bool IsAlwaysDarkWindow(IntPtr hwnd)
         {
-            if (IsProcessInList(hwnd, LinkedProfile.AlwaysDarkList)) return true;
+            if (System.Windows.Application.Current?.MainWindow is MainWindow main)
+            {
+                if (IsProcessInList(hwnd, main.AlwaysDarkList)) return true;
+            }
 
             StringBuilder sb = new StringBuilder(256);
             NativeMethods.GetClassName(hwnd, sb, sb.Capacity);
@@ -675,7 +717,10 @@ namespace FocusDimmer.Components
 
         private bool IsAlwaysBrightWindow(IntPtr hwnd)
         {
-            if (IsProcessInList(hwnd, LinkedProfile.AlwaysBrightList)) return true;
+            if (System.Windows.Application.Current?.MainWindow is MainWindow main)
+            {
+                if (IsProcessInList(hwnd, main.AlwaysBrightList)) return true;
+            }
 
             StringBuilder sb = new StringBuilder(256);
             NativeMethods.GetClassName(hwnd, sb, sb.Capacity);
@@ -707,6 +752,7 @@ namespace FocusDimmer.Components
 
         private void AddHoleForRect(NativeMethods.RECT r, double margin, double scaleX, double scaleY)
         {
+            if (LinkedProfile.ScreenRef == null) return;
             double width = (r.Right - r.Left);
             double height = (r.Bottom - r.Top);
             if (width <= 1 || height <= 1) return;
@@ -721,8 +767,10 @@ namespace FocusDimmer.Components
 
             if (left + w > 0 && top + h > 0)
             {
-                _holesGroup.Children.Add(new RectangleGeometry(new Rect(left, top, w, h)));
+                var rGeo = new RectangleGeometry(new Rect(left, top, w, h));
+                if (_holesGroup != null) _holesGroup.Children.Add(rGeo);
             }
         }
     }
 }
+

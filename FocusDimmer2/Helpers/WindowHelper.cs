@@ -65,43 +65,114 @@ namespace FocusDimmer.Helpers
 
             var windowInteropHelper = new WindowInteropHelper(window);
             var hwnd = windowInteropHelper.Handle;
+            if (hwnd == IntPtr.Zero) return;
 
-            // Windows 11 Build 22621+ (Mica Alt / Mica / Acrylic)
+            // Always enable immersive dark mode for title bar / system buttons
+            int darkMode = 1;
+            NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
+
+            // Windows 11 Build 22621+ (22H2 / 23H2 / 24H2)
             if (IsWindows11_22H2OrGreater())
             {
-                // Try DWMWA_SYSTEMBACKDROP_TYPE first for modern Win11 support (Main Window relied on this?)
-                // 2 = DWMSBT_MICA, 3 = DWMSBT_ACRYLIC, 4 = DWMSBT_MICA_ALT
-                int backdropType = 3; // Acrylic
-                NativeMethods.DwmSetWindowAttribute(hwnd, 38, ref backdropType, sizeof(int));
-                
-                int darkMode = 1; 
-                NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
+                // DWMWA_SYSTEMBACKDROP_TYPE: 3 = Acrylic (DWMSBT_TRANSIENTWINDOW)
+                int backdropType = NativeMethods.DWMSBT_TRANSIENTWINDOW;
+                NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DWMWA_SYSTEMBACKDROP_TYPE, ref backdropType, sizeof(int));
+
+                // Rounded corners
+                int cornerPreference = NativeMethods.DWMWCP_ROUND;
+                NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DWMWA_WINDOW_CORNER_PREFERENCE, ref cornerPreference, sizeof(int));
+            }
+            // Windows 11 Build 22000 (21H2)
+            else if (IsWindows11OrGreater())
+            {
+                int micaVal = 1;
+                NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DWMWA_MICA_EFFECT, ref micaVal, sizeof(int));
+
+                int cornerPreference = NativeMethods.DWMWCP_ROUND;
+                NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DWMWA_WINDOW_CORNER_PREFERENCE, ref cornerPreference, sizeof(int));
             }
             else
             {
-                // Fallback for Windows 10 or older Windows 11
-                // Enable Blur Behind
-                var accent = new NativeMethods.AccentPolicy();
-                accent.AccentState = NativeMethods.AccentState.ACCENT_ENABLE_BLURBEHIND;
-                
+                // Windows 10 fallback:
+                // Never apply SetWindowCompositionAttribute on Win11 to avoid full-screen blur bugs.
+                // On Windows 10, ACCENT_ENABLE_BLURBEHIND can be applied safely.
+                try
+                {
+                    var accent = new NativeMethods.AccentPolicy();
+                    accent.AccentState = NativeMethods.AccentState.ACCENT_ENABLE_BLURBEHIND;
+
+                    var accentStructSize = Marshal.SizeOf(accent);
+                    var accentPtr = Marshal.AllocHGlobal(accentStructSize);
+                    Marshal.StructureToPtr(accent, accentPtr, false);
+
+                    var data = new NativeMethods.WindowCompositionAttributeData();
+                    data.Attribute = NativeMethods.WindowCompositionAttribute.WCA_ACCENT_POLICY;
+                    data.SizeOfData = accentStructSize;
+                    data.Data = accentPtr;
+
+                    NativeMethods.SetWindowCompositionAttribute(hwnd, ref data);
+
+                    Marshal.FreeHGlobal(accentPtr);
+                }
+                catch
+                {
+                    // Ignore fallback errors on non-supported platforms
+                }
+            }
+        }
+
+        public static void DisableBackdropAndBlur(IntPtr hwnd)
+        {
+            if (hwnd == IntPtr.Zero) return;
+
+            try
+            {
+                // Disable Win11 System Backdrop (Mica / Acrylic)
+                if (IsWindows11_22H2OrGreater())
+                {
+                    int backdropType = NativeMethods.DWMSBT_NONE; // 1 = None
+                    NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DWMWA_SYSTEMBACKDROP_TYPE, ref backdropType, sizeof(int));
+                }
+                else if (IsWindows11OrGreater())
+                {
+                    int micaVal = 0;
+                    NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DWMWA_MICA_EFFECT, ref micaVal, sizeof(int));
+                }
+
+                // Reset DWM Glass margin extension
+                var margins = new NativeMethods.MARGINS { cxLeftWidth = 0, cxRightWidth = 0, cyTopHeight = 0, cyBottomHeight = 0 };
+                NativeMethods.DwmExtendFrameIntoClientArea(hwnd, ref margins);
+
+                // Disable AccentPolicy Blur / Acrylic
+                var accent = new NativeMethods.AccentPolicy { AccentState = NativeMethods.AccentState.ACCENT_DISABLED };
                 var accentStructSize = Marshal.SizeOf(accent);
                 var accentPtr = Marshal.AllocHGlobal(accentStructSize);
                 Marshal.StructureToPtr(accent, accentPtr, false);
 
-                var data = new NativeMethods.WindowCompositionAttributeData();
-                data.Attribute = NativeMethods.WindowCompositionAttribute.WCA_ACCENT_POLICY;
-                data.SizeOfData = accentStructSize;
-                data.Data = accentPtr;
+                var data = new NativeMethods.WindowCompositionAttributeData
+                {
+                    Attribute = NativeMethods.WindowCompositionAttribute.WCA_ACCENT_POLICY,
+                    SizeOfData = accentStructSize,
+                    Data = accentPtr
+                };
 
                 NativeMethods.SetWindowCompositionAttribute(hwnd, ref data);
-
                 Marshal.FreeHGlobal(accentPtr);
+            }
+            catch
+            {
+                // Fallback ignore
             }
         }
 
-        private static bool IsWindows11_22H2OrGreater()
+        public static bool IsWindows11_22H2OrGreater()
         {
             return Environment.OSVersion.Version.Major >= 10 && Environment.OSVersion.Version.Build >= 22621;
+        }
+
+        public static bool IsWindows11OrGreater()
+        {
+            return Environment.OSVersion.Version.Major >= 10 && Environment.OSVersion.Version.Build >= 22000;
         }
     }
 }

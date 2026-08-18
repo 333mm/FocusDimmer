@@ -9,7 +9,7 @@ namespace FocusDimmer.Models
         public bool RunAsAdmin { get; set; } = false;
         
         // Window persistence
-        public double WindowWidth { get; set; } = 750;
+        public double WindowWidth { get; set; } = 850;
         public double WindowHeight { get; set; } = 1000;
         public double WindowLeft { get; set; } = -10000; // Sentinel value
         public double WindowTop { get; set; } = -10000;  // Sentinel value
@@ -17,5 +17,15 @@ namespace FocusDimmer.Models
         // License migration persistence
         public bool IsLegacyMigrated { get; set; } = false;
         public bool IsLegacyBannerDismissed { get; set; } = false;
+        
+        // Global Presets (applies to all monitors)
+        public List<Preset> Presets { get; set; } = new();
+        public string SelectedPresetId { get; set; } = "";
+        public string DefaultPresetId { get; set; } = "";
+        
+        // Global Exclusion Lists
+        public string IgnoreList { get; set; } = "";
+        public string AlwaysBrightList { get; set; } = "";
+        public string AlwaysDarkList { get; set; } = "amdow, NVIDIA Overlay";
     }
 }
