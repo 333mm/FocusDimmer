@@ -303,15 +303,21 @@
                                                     <Border CornerRadius="6" Background="{StaticResource ControlBackground}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="10,5">
                                                         <StackPanel Orientation="Horizontal">
                                                             <TextBlock Text="{Binding DataContext.Strings.LabelColor, RelativeSource={RelativeSource AncestorType=Window}}" 
-                                                                       Foreground="{StaticResource TextSecondary}" Margin="0,0,10,0" VerticalAlignment="Center" FontSize="12"/>
-                                                            <Border Width="18" Height="18" CornerRadius="4" BorderThickness="1" BorderBrush="#555">
+                                                                       Foreground="{StaticResource TextSecondary}" Margin="0,0,8,0" VerticalAlignment="Center" FontSize="12"/>
+                                                            <Border Width="18" Height="18" CornerRadius="4" BorderThickness="1" BorderBrush="#555" VerticalAlignment="Center">
                                                                 <Border.Background>
                                                                     <SolidColorBrush Color="{Binding OverlayColorHex, Converter={StaticResource HexToColorConverter}}"/>
                                                                 </Border.Background>
                                                             </Border>
+                                                            <!-- PRO Pill Badge for Free Version -->
+                                                            <Border Visibility="{Binding DataContext.FreeBannerVisibility, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                    Background="#1560CDFF" BorderBrush="#3560CDFF" BorderThickness="1" CornerRadius="3" Padding="4,1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                                <TextBlock Text="🔒 PRO" Foreground="{StaticResource AccentColor}" FontWeight="Bold" FontSize="8"/>
+                                                            </Border>
                                                         </StackPanel>
                                                     </Border>
                                                 </Button>
+
                                             </Grid>
 
                                             <!-- Opacity Slider -->
