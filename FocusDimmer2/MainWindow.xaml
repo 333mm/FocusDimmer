@@ -692,11 +692,32 @@
                                Visibility="{Binding FreeBannerVisibility}"/>
                 </Grid>
 
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,12,0"
-                              IsEnabled="{Binding IsPro}">
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,12,0">
                     <StackPanel>
+                        <!-- Pro Upgrade Banner (Free Version only) -->
+                        <Button Visibility="{Binding FreeBannerVisibility}" Click="OpenStore_Click" Cursor="Hand" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch" Margin="0,0,0,14">
+                            <Border Background="#2060CDFF" BorderBrush="#6060CDFF" BorderThickness="1" CornerRadius="8" Padding="14,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="🔒 PRO Feature" Foreground="{StaticResource AccentColor}" FontWeight="Bold" FontSize="13"/>
+                                        <TextBlock Text="{Binding Strings.BannerText, FallbackValue='Upgrade to Pro to unlock unlimited presets and app-specific rules.'}" Foreground="{StaticResource TextSecondary}" FontSize="11" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Background="{StaticResource AccentColor}" CornerRadius="6" Padding="12,6" VerticalAlignment="Center">
+                                        <TextBlock Text="Upgrade" Foreground="Black" FontWeight="Bold" FontSize="11"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </Button>
+
+                        <!-- Presets Content (Disabled for Free version) -->
+                        <StackPanel IsEnabled="{Binding IsPro}">
                         <!-- Preset Selector & Toolbar -->
                         <Border Style="{StaticResource CardStyle}">
+
                             <StackPanel>
                                 <TextBlock Text="{Binding Strings.HeaderPreset, FallbackValue='Global Presets'}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,12"/>
                                 <Grid>
@@ -762,9 +783,11 @@
                                 </WrapPanel>
                             </StackPanel>
                         </Border>
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
+
 
 
             <!-- ===================================================== -->
