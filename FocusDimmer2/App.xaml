@@ -11,17 +11,18 @@
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityHelper"/>
         <converters:DefaultComparisonConverter x:Key="DefaultComparisonConverter"/>
 
-        <!-- Colors & Brushes -->
+        <!-- Windows 11 Fluent Colors & Brushes -->
         <Color x:Key="ColorAccent">#60CDFF</Color>
         <Color x:Key="ColorAccentHover">#78D9FF</Color>
         <Color x:Key="ColorTextPrimary">#FFFFFF</Color>
-        <Color x:Key="ColorTextSecondary">#D0D0D0</Color>
-        <Color x:Key="ColorTextTertiary">#909090</Color>
-        <Color x:Key="ColorControlBg">#25FFFFFF</Color>
-        <Color x:Key="ColorControlBgHover">#35FFFFFF</Color>
-        <Color x:Key="ColorCardBg">#15FFFFFF</Color>
+        <Color x:Key="ColorTextSecondary">#CFCFCF</Color>
+        <Color x:Key="ColorTextTertiary">#9E9E9E</Color>
+        <Color x:Key="ColorControlBg">#15FFFFFF</Color>
+        <Color x:Key="ColorControlBgHover">#22FFFFFF</Color>
+        <Color x:Key="ColorCardBg">#0EFFFFFF</Color>
         
-        <SolidColorBrush x:Key="WindowBackground" Color="#D9181818"/>
+        <SolidColorBrush x:Key="WindowBackground" Color="#1E1E1E"/>
+        <SolidColorBrush x:Key="SidebarBackground" Color="#181818"/>
         <SolidColorBrush x:Key="CardBackground" Color="{StaticResource ColorCardBg}"/>
         <SolidColorBrush x:Key="ControlBackground" Color="{StaticResource ColorControlBg}"/>
         <SolidColorBrush x:Key="ControlBackgroundHover" Color="{StaticResource ColorControlBgHover}"/>
@@ -31,7 +32,9 @@
         <SolidColorBrush x:Key="TextPrimary" Color="{StaticResource ColorTextPrimary}"/>
         <SolidColorBrush x:Key="TextSecondary" Color="{StaticResource ColorTextSecondary}"/>
         <SolidColorBrush x:Key="TextTertiary" Color="{StaticResource ColorTextTertiary}"/>
-        <SolidColorBrush x:Key="BorderBrush" Color="#15FFFFFF"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#14FFFFFF"/>
+        <SolidColorBrush x:Key="CardBorderBrush" Color="#18FFFFFF"/>
+
 
         <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
@@ -316,6 +319,7 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
+        <!-- Standard CheckBox -->
         <Style TargetType="CheckBox">
             <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
             <Setter Property="Margin" Value="0,5"/>
@@ -360,6 +364,54 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Windows 11 Fluent ToggleSwitch Style for CheckBox -->
+        <Style x:Key="ToggleSwitchStyle" TargetType="{x:Type CheckBox}">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <Grid Background="Transparent" SnapsToDevicePixels="True">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <ContentPresenter Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0"/>
+
+                            <!-- Capsule Switch Track (Width 40, Height 20) -->
+                            <Border Grid.Column="1" x:Name="SwitchTrack" Width="40" Height="20" CornerRadius="10"
+                                    Background="#20FFFFFF" BorderBrush="#45FFFFFF" BorderThickness="1"
+                                    VerticalAlignment="Center">
+                                <!-- Thumb Knob (12x12) -->
+                                <Border x:Name="SwitchThumb" Width="12" Height="12" CornerRadius="6"
+                                        Background="#CCCCCC" HorizontalAlignment="Left" Margin="3,0,0,0">
+                                </Border>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="SwitchTrack" Property="Background" Value="{StaticResource AccentColor}"/>
+                                <Setter TargetName="SwitchTrack" Property="BorderBrush" Value="{StaticResource AccentColor}"/>
+                                <Setter TargetName="SwitchThumb" Property="Background" Value="#101010"/>
+                                <Setter TargetName="SwitchThumb" Property="HorizontalAlignment" Value="Right"/>
+                                <Setter TargetName="SwitchThumb" Property="Margin" Value="0,0,3,0"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="SwitchTrack" Property="BorderBrush" Value="{StaticResource AccentHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
 
         <Style TargetType="TextBox">
             <Setter Property="Background" Value="{StaticResource ControlBackground}"/>
@@ -683,11 +735,21 @@
 
         <Style x:Key="CardStyle" TargetType="Border">
             <Setter Property="Background" Value="{StaticResource CardBackground}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="18,16"/>
             <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
+
+        <Style x:Key="SettingsCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,14"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
     </Application.Resources>
+
 </Application>

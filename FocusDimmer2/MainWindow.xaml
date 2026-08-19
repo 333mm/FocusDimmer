@@ -363,27 +363,41 @@
                                     <!-- Card 2: Targets & Scope -->
                                     <Border Style="{StaticResource CardStyle}">
                                         <StackPanel>
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                                                 <TextBlock Text="&#xE737;" FontFamily="{StaticResource IconFont}" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,10,0"/>
                                                 <TextBlock Text="{Binding DataContext.Strings.HeaderBehavior, FallbackValue='Targets &amp; Scope', RelativeSource={RelativeSource AncestorType=Window}}" 
                                                            FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
                                             </StackPanel>
 
-                                            <!-- Dim Desktop Only -->
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                                <CheckBox IsChecked="{Binding DimDesktopOnly}" Content="{Binding DataContext.Strings.CheckDimDesktopOnly, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Center"/>
-                                                <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFont}" FontSize="12" Margin="6,0,0,0" 
-                                                           Foreground="{StaticResource TextTertiary}" Cursor="Help" VerticalAlignment="Center"
-                                                           ToolTip="{Binding DataContext.Strings.TooltipDimDesktopOnly, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                                            </StackPanel>
+                                            <!-- Dim Desktop Only Row -->
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding DataContext.Strings.CheckDimDesktopOnly, RelativeSource={RelativeSource AncestorType=Window}}" FontSize="13" Foreground="{StaticResource TextPrimary}"/>
+                                                    <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFont}" FontSize="12" Margin="6,0,0,0" 
+                                                               Foreground="{StaticResource TextTertiary}" Cursor="Help" VerticalAlignment="Center"
+                                                               ToolTip="{Binding DataContext.Strings.TooltipDimDesktopOnly, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                                </StackPanel>
+                                                <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding DimDesktopOnly}"/>
+                                            </Grid>
 
-                                            <StackPanel Margin="24,4,0,4">
-                                                <CheckBox IsChecked="{Binding ExcludeTaskbar}" Content="{Binding DataContext.Strings.CheckTaskbar, RelativeSource={RelativeSource AncestorType=Window}}" 
-                                                          IsEnabled="{Binding DimDesktopOnly, Converter={StaticResource InverseBooleanConverter}}"/>
-                                                <CheckBox IsChecked="{Binding ExcludeTopmost}" Content="{Binding DataContext.Strings.CheckTopmost, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                          IsEnabled="{Binding DimDesktopOnly, Converter={StaticResource InverseBooleanConverter}}"/>
-                                                <CheckBox IsChecked="{Binding UseTightFrame}" Content="{Binding DataContext.Strings.CheckTightFrame, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                          IsEnabled="{Binding DimDesktopOnly, Converter={StaticResource InverseBooleanConverter}}"/>
+                                            <!-- Sub-options when not DimDesktopOnly -->
+                                            <StackPanel Margin="0,6,0,0" IsEnabled="{Binding DimDesktopOnly, Converter={StaticResource InverseBooleanConverter}}">
+                                                <StackPanel.Style>
+                                                    <Style TargetType="StackPanel">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsEnabled" Value="False">
+                                                                <Setter Property="Opacity" Value="0.35"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </StackPanel.Style>
+                                                <CheckBox IsChecked="{Binding ExcludeTaskbar}" Content="{Binding DataContext.Strings.CheckTaskbar, RelativeSource={RelativeSource AncestorType=Window}}" Margin="0,3"/>
+                                                <CheckBox IsChecked="{Binding ExcludeTopmost}" Content="{Binding DataContext.Strings.CheckTopmost, RelativeSource={RelativeSource AncestorType=Window}}" Margin="0,3"/>
+                                                <CheckBox IsChecked="{Binding UseTightFrame}" Content="{Binding DataContext.Strings.CheckTightFrame, RelativeSource={RelativeSource AncestorType=Window}}" Margin="0,3"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
@@ -391,7 +405,7 @@
                                     <!-- Card 3: Advanced Dimming & Idle (PRO) -->
                                     <Border Style="{StaticResource CardStyle}" IsEnabled="{Binding DataContext.IsPro, RelativeSource={RelativeSource AncestorType=Window}}">
                                         <StackPanel>
-                                            <Grid Margin="0,0,0,14">
+                                            <Grid Margin="0,0,0,16">
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                     <TextBlock Text="&#xE708;" FontFamily="{StaticResource IconFont}" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,10,0"/>
                                                     <TextBlock Text="{Binding DataContext.Strings.HeaderAdvancedBehavior, FallbackValue='Advanced Behavior', RelativeSource={RelativeSource AncestorType=Window}}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
@@ -403,22 +417,40 @@
                                                 </Border>
                                             </Grid>
                                             
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                                <CheckBox IsChecked="{Binding DimEntirelyWhenInactive}" Content="{Binding DataContext.Strings.CheckDimEntirely, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Center"/>
-                                                <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFont}" FontSize="12" Margin="6,0,0,0" 
-                                                           Foreground="{StaticResource TextTertiary}" Cursor="Help" VerticalAlignment="Center"
-                                                           ToolTip="{Binding DataContext.Strings.TooltipDimEntirely, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                                            </StackPanel>
+                                            <!-- Setting 1: Dim Entirely When Inactive -->
+                                            <Grid Margin="0,0,0,12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding DataContext.Strings.CheckDimEntirely, RelativeSource={RelativeSource AncestorType=Window}}" FontSize="13" Foreground="{StaticResource TextPrimary}"/>
+                                                    <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFont}" FontSize="12" Margin="6,0,0,0" 
+                                                               Foreground="{StaticResource TextTertiary}" Cursor="Help" VerticalAlignment="Center"
+                                                               ToolTip="{Binding DataContext.Strings.TooltipDimEntirely, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                                </StackPanel>
+                                                <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding DimEntirelyWhenInactive}"/>
+                                            </Grid>
+
+                                            <Separator Background="{StaticResource BorderBrush}" Margin="0,0,0,12"/>
                                             
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                                <CheckBox IsChecked="{Binding DimWhenIdle}" Content="{Binding DataContext.Strings.CheckDimWhenIdle, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Center"/>
-                                                <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFont}" FontSize="12" Margin="6,0,0,0" 
-                                                           Foreground="{StaticResource TextTertiary}" Cursor="Help" VerticalAlignment="Center"
-                                                           ToolTip="{Binding DataContext.Strings.TooltipDimWhenIdle, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                                            </StackPanel>
+                                            <!-- Setting 2: Dim When Idle -->
+                                            <Grid Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding DataContext.Strings.CheckDimWhenIdle, RelativeSource={RelativeSource AncestorType=Window}}" FontSize="13" Foreground="{StaticResource TextPrimary}"/>
+                                                    <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFont}" FontSize="12" Margin="6,0,0,0" 
+                                                               Foreground="{StaticResource TextTertiary}" Cursor="Help" VerticalAlignment="Center"
+                                                               ToolTip="{Binding DataContext.Strings.TooltipDimWhenIdle, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                                </StackPanel>
+                                                <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding DimWhenIdle}"/>
+                                            </Grid>
 
                                             <!-- Idle Parameters (Expanded) -->
-                                            <StackPanel Margin="24,6,0,0" Visibility="{Binding DimWhenIdle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <StackPanel Margin="0,10,0,0" Visibility="{Binding DimWhenIdle, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <!-- Idle Timeout -->
                                                 <Grid Margin="0,0,0,4">
                                                     <Grid.ColumnDefinitions>
@@ -886,15 +918,51 @@
 
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,12,0">
                     <StackPanel>
-                        <!-- Card 1: Startup & Privileges -->
+                        <!-- Card 1: Startup & Behavior -->
                         <Border Style="{StaticResource CardStyle}">
                             <StackPanel>
-                                <TextBlock Text="{Binding Strings.HeaderStartup}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,12"/>
-                                <CheckBox x:Name="AutoStartCheck" Content="{Binding Strings.CheckAutoStart}" Checked="AutoStart_Checked" Unchecked="AutoStart_Unchecked" Margin="0,0,0,8"/>
-                                <CheckBox x:Name="AdminRunCheck" Content="{Binding Strings.CheckAdmin}" IsEnabled="{Binding ElementName=AutoStartCheck, Path=IsChecked}" Checked="AdminRun_Changed" Unchecked="AdminRun_Changed" Margin="0,0,0,8"/>
-                                <CheckBox Content="{Binding Strings.CheckCloseToTray}" IsChecked="{Binding CloseToTray, Mode=TwoWay}"/>
-                            </StackPanel>
+                                <TextBlock Text="{Binding Strings.HeaderStartup}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,14"/>
 
+                                <!-- Setting 1: Auto Start -->
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Strings.CheckAutoStart}" FontSize="13" Foreground="{StaticResource TextPrimary}"/>
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1" x:Name="AutoStartCheck" Style="{StaticResource ToggleSwitchStyle}" Checked="AutoStart_Checked" Unchecked="AutoStart_Unchecked"/>
+                                </Grid>
+
+                                <Separator Background="{StaticResource BorderBrush}" Margin="0,0,0,12"/>
+
+                                <!-- Setting 2: Admin Privileges -->
+                                <Grid Margin="0,0,0,12" IsEnabled="{Binding ElementName=AutoStartCheck, Path=IsChecked}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Strings.CheckAdmin}" FontSize="13" Foreground="{StaticResource TextPrimary}"/>
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1" x:Name="AdminRunCheck" Style="{StaticResource ToggleSwitchStyle}" Checked="AdminRun_Changed" Unchecked="AdminRun_Changed"/>
+                                </Grid>
+
+                                <Separator Background="{StaticResource BorderBrush}" Margin="0,0,0,12"/>
+
+                                <!-- Setting 3: Close to Tray -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Strings.CheckCloseToTray}" FontSize="13" Foreground="{StaticResource TextPrimary}"/>
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" IsChecked="{Binding CloseToTray, Mode=TwoWay}"/>
+                                </Grid>
+                            </StackPanel>
                         </Border>
 
                         <!-- Card 2: Language -->
@@ -902,13 +970,13 @@
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="160"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Strings.HeaderLanguage, FallbackValue='Language'}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
-                                    <TextBlock Text="{Binding Strings.SubHeaderLanguage, FallbackValue='Choose display language'}" FontSize="12" Foreground="{StaticResource TextTertiary}" Margin="0,2,0,0"/>
+                                    <TextBlock Text="{Binding Strings.SubHeaderLanguage, FallbackValue='Choose display language'}" FontSize="11.5" Foreground="{StaticResource TextTertiary}" Margin="0,2,0,0"/>
                                 </StackPanel>
-                                <ComboBox Grid.Column="1" Height="34" SelectedIndex="{Binding SelectedLanguageIndex}" 
+                                <ComboBox Grid.Column="1" Height="32" SelectedIndex="{Binding SelectedLanguageIndex}" 
                                           Style="{StaticResource RoundedComboBox}" HorizontalAlignment="Stretch">
                                     <ComboBoxItem Content="English"/>
                                     <ComboBoxItem Content="日本語"/>
@@ -930,7 +998,7 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Strings.AppTitle}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
-                                    <TextBlock Text="{Binding AppVersion, StringFormat='Version: {0}'}" FontSize="12" Foreground="{StaticResource TextTertiary}" Margin="0,2,0,0"/>
+                                    <TextBlock Text="{Binding AppVersion, StringFormat='Version: {0}'}" FontSize="11.5" Foreground="{StaticResource TextTertiary}" Margin="0,2,0,0"/>
                                 </StackPanel>
                                 <Button Grid.Column="1" Visibility="{Binding ProBadgeWithIconVisibility}" Click="MigrationInfo_Click" 
                                         Background="Transparent" BorderThickness="1" BorderBrush="#50FFB900" Padding="12,6" Cursor="Hand" ToolTip="Migration Info">
@@ -943,6 +1011,7 @@
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
+
             </Grid>
 
         </Grid>
