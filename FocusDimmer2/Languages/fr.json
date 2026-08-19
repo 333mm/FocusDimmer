@@ -86,5 +86,8 @@
   "SubHeaderLanguage": "Choisir la langue d'affichage",
   "SubHeaderGeneral": "Démarrage de l'application, comportement et paramètres de langue.",
   "BtnMigrationInfo": "Info de migration",
-  "MsgStartupDisabledByUser": "Le démarrage automatique est désactivé dans les paramètres Windows ou le Gestionnaire des tâches.\nVeuillez activer Focus Dimmer dans les paramètres 'Applications de démarrage' de Windows."
+  "MsgStartupDisabledByUser": "Le démarrage automatique est désactivé dans les paramètres Windows ou le Gestionnaire des tâches.\nVeuillez activer Focus Dimmer dans les paramètres 'Applications de démarrage' de Windows.",
+  "CheckCloseToTray": "Minimiser dans la barre d'état à la fermeture (×)",
+  "LabelLinkMonitors": "Lier tous les écrans",
+  "TooltipLinkMonitors": "Lorsqu'activé, les modifications apportées à un écran s'appliquent automatiquement à tous."
 }

@@ -96,5 +96,8 @@
   "SubHeaderLanguage": "Choose display language",
   "SubHeaderGeneral": "App startup, behavior and language settings.",
   "BtnMigrationInfo": "Migration Info",
-  "MsgStartupDisabledByUser": "Startup is disabled in Windows Settings or Task Manager.\nPlease enable Focus Dimmer in Windows 'Startup Apps' settings."
+  "MsgStartupDisabledByUser": "Startup is disabled in Windows Settings or Task Manager.\nPlease enable Focus Dimmer in Windows 'Startup Apps' settings.",
+  "CheckCloseToTray": "Minimize to system tray on close (×)",
+  "LabelLinkMonitors": "Link All Displays",
+  "TooltipLinkMonitors": "When enabled, changes to one display will automatically apply to all displays."
 }

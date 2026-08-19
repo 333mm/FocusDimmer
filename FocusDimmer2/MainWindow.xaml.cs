@@ -171,8 +171,21 @@ namespace FocusDimmer
             get => _appSettings.AlwaysDarkList;
             set { _appSettings.AlwaysDarkList = value; NotifyPropertyChanged(); RequestSave(); }
         }
+
+        public bool CloseToTray
+        {
+            get => _appSettings.CloseToTray;
+            set { _appSettings.CloseToTray = value; NotifyPropertyChanged(); RequestSave(); }
+        }
+
+        public bool AreMonitorsLinked
+        {
+            get => _appSettings.AreMonitorsLinked;
+            set { _appSettings.AreMonitorsLinked = value; NotifyPropertyChanged(); RequestSave(); }
+        }
         
         public ICommand? SetAsDefaultCommand { get; private set; }
+
 
         public string AppVersion { get; private set; } = "";
 
@@ -1069,27 +1082,79 @@ namespace FocusDimmer
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            if (!_reallyExit) { e.Cancel = true; this.Hide(); }
-            else
-            {
-                SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
-                SaveSettingsActual();
-                if (_notifyIcon != null) _notifyIcon.Dispose();
-                foreach (var ov in _overlays) ov.Dispose();
-                if (this.IsLoaded)
+            if (!_reallyExit) 
+            { 
+                if (CloseToTray)
                 {
-                    var handle = new WindowInteropHelper(this).Handle;
-                    if (handle != IntPtr.Zero)
-                    {
-                        foreach (var kvp in _hotkeys) NativeMethods.UnregisterHotKey(handle, kvp.Value.id);
-                    }
+                    e.Cancel = true; 
+                    this.Hide(); 
+                    return;
                 }
-                base.OnClosing(e);
-                Application.Current.Shutdown();
+            }
+
+            SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
+            SaveSettingsActual();
+            if (_notifyIcon != null) _notifyIcon.Dispose();
+            foreach (var ov in _overlays) ov.Dispose();
+            if (this.IsLoaded)
+            {
+                var handle = new WindowInteropHelper(this).Handle;
+                if (handle != IntPtr.Zero)
+                {
+                    foreach (var kvp in _hotkeys) NativeMethods.UnregisterHotKey(handle, kvp.Value.id);
+                }
+            }
+            base.OnClosing(e);
+            Application.Current.Shutdown();
+        }
+
+        private void LinkMonitors_Click(object sender, RoutedEventArgs e)
+        {
+            if (AreMonitorsLinked && MonitorProfiles.Count > 1)
+            {
+                var activeProfile = MonitorTabs?.SelectedItem as MonitorProfile ?? MonitorProfiles.FirstOrDefault();
+                if (activeProfile != null)
+                {
+                    SyncAllMonitorsFrom(activeProfile);
+                }
+            }
+            RequestSave();
+        }
+
+        private void SyncAllMonitorsFrom(MonitorProfile source)
+        {
+            _isApplyingPreset = true;
+            try
+            {
+                foreach (var p in MonitorProfiles)
+                {
+                    if (p == source) continue;
+                    p.Opacity = source.Opacity;
+                    p.Margin = source.Margin;
+                    p.DelayDarken = source.DelayDarken;
+                    p.DurationDarken = source.DurationDarken;
+                    p.DurationBrighten = source.DurationBrighten;
+                    p.ExcludeTaskbar = source.ExcludeTaskbar;
+                    p.ExcludeTopmost = source.ExcludeTopmost;
+                    p.UseTightFrame = source.UseTightFrame;
+                    p.DimEntirelyWhenInactive = source.DimEntirelyWhenInactive;
+                    p.DimDesktopOnly = source.DimDesktopOnly;
+                    p.DimWhenIdle = source.DimWhenIdle;
+                    p.IdleTimeout = source.IdleTimeout;
+                    p.IdleDimOpacity = source.IdleDimOpacity;
+                    p.OverlayColorHex = source.OverlayColorHex;
+                }
+            }
+            finally
+            {
+                _isApplyingPreset = false;
             }
         }
+
+
         private void MinimizeButton_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
         private void CloseButton_Click(object sender, RoutedEventArgs e) => this.Close();
+
 
         private void NavButton_Checked(object sender, RoutedEventArgs e)
         {
@@ -1483,8 +1548,15 @@ namespace FocusDimmer
 
         private void SyncProfileToPreset(MonitorProfile profile, string propertyName)
         {
-            if (_isApplyingPreset || SelectedGlobalPreset == null) return;
+            if (_isApplyingPreset) return;
+
+            // ディスプレイ設定リンクが有効な場合、他のすべてのディスプレイに設定を同期
+            if (AreMonitorsLinked && MonitorProfiles.Count > 1)
+            {
+                PropagateToLinkedMonitors(profile, propertyName);
+            }
             
+            if (SelectedGlobalPreset == null) return;
             var preset = SelectedGlobalPreset;
             
             switch (propertyName)
@@ -1533,6 +1605,41 @@ namespace FocusDimmer
                     break;
             }
         }
+
+        private void PropagateToLinkedMonitors(MonitorProfile source, string propertyName)
+        {
+            _isApplyingPreset = true;
+            try
+            {
+                foreach (var p in MonitorProfiles)
+                {
+                    if (p == source) continue;
+                    switch (propertyName)
+                    {
+                        case nameof(MonitorProfile.Opacity): p.Opacity = source.Opacity; break;
+                        case nameof(MonitorProfile.Margin): p.Margin = source.Margin; break;
+                        case nameof(MonitorProfile.DelayDarken): p.DelayDarken = source.DelayDarken; break;
+                        case nameof(MonitorProfile.DurationDarken): p.DurationDarken = source.DurationDarken; break;
+                        case nameof(MonitorProfile.DurationBrighten): p.DurationBrighten = source.DurationBrighten; break;
+                        case nameof(MonitorProfile.ExcludeTaskbar): p.ExcludeTaskbar = source.ExcludeTaskbar; break;
+                        case nameof(MonitorProfile.ExcludeTopmost): p.ExcludeTopmost = source.ExcludeTopmost; break;
+                        case nameof(MonitorProfile.UseTightFrame): p.UseTightFrame = source.UseTightFrame; break;
+                        case nameof(MonitorProfile.DimEntirelyWhenInactive): p.DimEntirelyWhenInactive = source.DimEntirelyWhenInactive; break;
+                        case nameof(MonitorProfile.DimDesktopOnly): p.DimDesktopOnly = source.DimDesktopOnly; break;
+                        case nameof(MonitorProfile.DimWhenIdle): p.DimWhenIdle = source.DimWhenIdle; break;
+                        case nameof(MonitorProfile.IdleTimeout): p.IdleTimeout = source.IdleTimeout; break;
+                        case nameof(MonitorProfile.IdleDimOpacity): p.IdleDimOpacity = source.IdleDimOpacity; break;
+                        case nameof(MonitorProfile.OverlayColorHex): p.OverlayColorHex = source.OverlayColorHex; break;
+                    }
+                }
+            }
+            finally
+            {
+                _isApplyingPreset = false;
+            }
+        }
+
+
 
         #endregion
         private void ActiveProcessCheckTimer_Tick(object? sender, EventArgs e)

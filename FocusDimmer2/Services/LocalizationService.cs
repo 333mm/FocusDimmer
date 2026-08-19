@@ -115,6 +115,9 @@ namespace FocusDimmer.Services
         public string SubHeaderGeneral { get; set; } = "App startup, behavior and language settings.";
         public string BtnMigrationInfo { get; set; } = "Migration Info";
         public string MsgStartupDisabledByUser { get; set; } = "Startup is disabled in Windows Settings or Task Manager.\nPlease enable Focus Dimmer in Windows 'Startup Apps' settings.";
+        public string CheckCloseToTray { get; set; } = "Minimize to system tray on close (×)";
+        public string LabelLinkMonitors { get; set; } = "Link All Displays";
+        public string TooltipLinkMonitors { get; set; } = "When enabled, changes to one display will automatically apply to all displays.";
         
         // Indexer for accessing properties by string name
         public string? this[string propertyName]
@@ -240,6 +243,9 @@ namespace FocusDimmer.Services
             SubHeaderGeneral = "App startup, behavior and language settings.";
             BtnMigrationInfo = "Migration Info";
             MsgStartupDisabledByUser = "Startup is disabled in Windows Settings or Task Manager.\nPlease enable Focus Dimmer in Windows 'Startup Apps' settings.";
+            CheckCloseToTray = "Minimize to system tray on close (×)";
+            LabelLinkMonitors = "Link All Displays";
+            TooltipLinkMonitors = "When enabled, changes to one display will automatically apply to all displays.";
         }
         private void SetDefaultJapanese()
         {
@@ -328,6 +334,9 @@ namespace FocusDimmer.Services
             SubHeaderGeneral = "アプリの起動、動作、言語の設定です。";
             BtnMigrationInfo = "移行情報";
             MsgStartupDisabledByUser = "自動起動が Windows の設定またはタスクマネージャーによって無効化されています。\nWindows の「スタートアップ アプリ」設定を開いて Focus Dimmer を有効にしてください。";
+            CheckCloseToTray = "閉じるボタン（×）でタスクトレイに最小化する";
+            LabelLinkMonitors = "全ディスプレイ連動";
+            TooltipLinkMonitors = "有効にすると、すべてのディスプレイの設定が同時に連動して変更されます。";
         }
         public event PropertyChangedEventHandler? PropertyChanged;
         void OnProp([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

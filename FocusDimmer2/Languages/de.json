@@ -86,5 +86,8 @@
   "SubHeaderLanguage": "Anzeigesprache auswählen",
   "SubHeaderGeneral": "App-Start-, Verhaltens- und Spracheinstellungen.",
   "BtnMigrationInfo": "Migrationsinfo",
-  "MsgStartupDisabledByUser": "Der Autostart ist in den Windows-Einstellungen oder im Task-Manager deaktiviert.\nBitte aktivieren Sie Focus Dimmer in den Windows-Einstellungen für 'Autostart-Apps'."
+  "MsgStartupDisabledByUser": "Der Autostart ist in den Windows-Einstellungen oder im Task-Manager deaktiviert.\nBitte aktivieren Sie Focus Dimmer in den Windows-Einstellungen für 'Autostart-Apps'.",
+  "CheckCloseToTray": "Beim Schließen (×) in Taskleiste minimieren",
+  "LabelLinkMonitors": "Alle Monitore verknüpfen",
+  "TooltipLinkMonitors": "Wenn aktiviert, werden Änderungen an einem Monitor automatisch auf alle Monitore übertragen."
 }

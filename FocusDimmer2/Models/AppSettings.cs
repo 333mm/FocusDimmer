@@ -7,6 +7,8 @@ namespace FocusDimmer.Models
         public List<MonitorProfile> Profiles { get; set; } = new();
         public bool AutoStart { get; set; } = false;
         public bool RunAsAdmin { get; set; } = false;
+        public bool CloseToTray { get; set; } = true;
+        public bool AreMonitorsLinked { get; set; } = false;
         
         // Window persistence
         public double WindowWidth { get; set; } = 850;

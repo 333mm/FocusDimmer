@@ -96,5 +96,8 @@
   "SubHeaderLanguage": "表示言語を選択します",
   "SubHeaderGeneral": "アプリの起動、動作、言語の設定です。",
   "BtnMigrationInfo": "移行情報",
-  "MsgStartupDisabledByUser": "自動起動が Windows の設定またはタスクマネージャーによって無効化されています。\nWindows の「スタートアップ アプリ」設定を開いて Focus Dimmer を有効にしてください。"
+  "MsgStartupDisabledByUser": "自動起動が Windows の設定またはタスクマネージャーによって無効化されています。\nWindows の「スタートアップ アプリ」設定を開いて Focus Dimmer を有効にしてください。",
+  "CheckCloseToTray": "閉じるボタン（×）でタスクトレイに最小化する",
+  "LabelLinkMonitors": "全ディスプレイ連動",
+  "TooltipLinkMonitors": "有効にすると、すべてのディスプレイの設定が同時に連動して変更されます。"
 }

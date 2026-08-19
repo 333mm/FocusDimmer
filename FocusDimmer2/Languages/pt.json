@@ -86,5 +86,8 @@
   "SubHeaderLanguage": "Escolha o idioma de exibição",
   "SubHeaderGeneral": "Inicialização do aplicativo, comportamento e configurações de idioma.",
   "BtnMigrationInfo": "Info de migração",
-  "MsgStartupDisabledByUser": "A inicialização automática está desativada nas Configurações do Windows ou no Gerenciador de Tarefas.\nAtive o Focus Dimmer nas configurações de 'Aplicativos de Inicialização' do Windows."
+  "MsgStartupDisabledByUser": "A inicialização automática está desativada nas Configurações do Windows ou no Gerenciador de Tarefas.\nAtive o Focus Dimmer nas configurações de 'Aplicativos de Inicialização' do Windows.",
+  "CheckCloseToTray": "Minimizar para a bandeja ao fechar (×)",
+  "LabelLinkMonitors": "Vincular todas as telas",
+  "TooltipLinkMonitors": "Quando ativado, as alterações em uma tela serão aplicadas automaticamente a todas."
 }

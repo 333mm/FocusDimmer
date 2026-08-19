@@ -87,5 +87,8 @@
   "SubHeaderLanguage": "选择显示语言",
   "SubHeaderGeneral": "应用程序启动、行为和语言设置。",
   "BtnMigrationInfo": "迁移信息",
-  "MsgStartupDisabledByUser": "自动启动已在 Windows 设置或任务管理器中被禁用。\n请在 Windows“启动应用”设置中启用 Focus Dimmer。"
+  "MsgStartupDisabledByUser": "自动启动已在 Windows 设置或任务管理器中被禁用。\n请在 Windows“启动应用”设置中启用 Focus Dimmer。",
+  "CheckCloseToTray": "关闭按钮（×）最小化到系统托盘",
+  "LabelLinkMonitors": "链接所有显示器",
+  "TooltipLinkMonitors": "启用后，对任一显示器的设置更改将自动同步到所有显示器。"
 }
