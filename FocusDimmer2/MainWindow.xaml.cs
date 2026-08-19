@@ -534,12 +534,10 @@ namespace FocusDimmer
 
         private void ShowProPromo()
         {
-            var result = System.Windows.MessageBox.Show(Strings.MsgProRequired, "Pro Version Required", MessageBoxButton.YesNo, MessageBoxImage.Information);
-            if (result == MessageBoxResult.Yes)
-            {
-                OpenStore_Click(this, new RoutedEventArgs());
-            }
+            // ポップアップメッセージを挟まず直接アドオン購入画面を開く
+            OpenStore_Click(this, new RoutedEventArgs());
         }
+
 
         private void MigrationInfo_Click(object sender, RoutedEventArgs e)
         {
