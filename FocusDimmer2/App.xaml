@@ -153,44 +153,46 @@
             </Setter>
         </Style>
 
-        <!-- Windows 11 Fluent Navigation RadioButton Style -->
+        <!-- Windows 11 Fluent Navigation RadioButton Style (NavigationViewItem) -->
         <Style x:Key="NavRadioButtonStyle" TargetType="{x:Type RadioButton}">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="Foreground" Value="#D6D6D6"/>
             <Setter Property="FontSize" Value="13.5"/>
             <Setter Property="FontWeight" Value="Normal"/>
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Margin" Value="0,1.5"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type RadioButton}">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="5" Padding="10,0">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4" Padding="12,0">
                             <Grid>
                                 <!-- Active Indicator Line (Left) -->
                                 <Border x:Name="indicator" Width="3" Height="16" Background="{StaticResource AccentColor}" 
-                                        CornerRadius="1.5" HorizontalAlignment="Left" Visibility="Collapsed" Margin="-6,0,0,0"/>
+                                        CornerRadius="1.5" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                        Visibility="Collapsed" Margin="-12,0,0,0"/>
                                 
-                                <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#14FFFFFF"/>
-                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                                <Setter TargetName="border" Property="Background" Value="#12FFFFFF"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#20FFFFFF"/>
+                                <Setter TargetName="border" Property="Background" Value="#18FFFFFF"/>
                                 <Setter TargetName="indicator" Property="Visibility" Value="Visible"/>
-                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="FontWeight" Value="Medium"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
 
 
         <!-- Icon Button Style - no clipping -->
