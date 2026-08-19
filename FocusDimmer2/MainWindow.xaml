@@ -21,7 +21,8 @@
         <!-- ========================================================= -->
         <!-- LEFT SIDEBAR (NAVIGATION)                                 -->
         <!-- ========================================================= -->
-        <Border Grid.Column="0" Background="#0CFFFFFF" BorderBrush="#14FFFFFF" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0" Background="{StaticResource SidebarBackground}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+
             <Grid Margin="12,16,12,16">
                 <Grid.RowDefinitions>
                     <!-- App Title / Brand -->
@@ -828,30 +829,32 @@
                         <StackPanel IsEnabled="{Binding IsPro}">
                         <!-- Preset Selector & Toolbar -->
                         <Border Style="{StaticResource CardStyle}">
-
-
                             <StackPanel>
-                                <TextBlock Text="{Binding Strings.HeaderPreset, FallbackValue='Global Presets'}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,12"/>
-                                <Grid>
+                                <Grid Margin="0,0,0,12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <ComboBox Grid.Column="0" x:Name="PresetComboBox" Style="{StaticResource RoundedComboBox}" 
-                                              ItemsSource="{Binding GlobalPresets}" SelectedValue="{Binding SelectedGlobalPresetId}" 
-                                              SelectedValuePath="Id" DisplayMemberPath="Name" SelectionChanged="GlobalPreset_SelectionChanged" Height="34"/>
-                                    <Button Grid.Column="1" Click="AddGlobalPreset_Click" Margin="8,0,0,0" Width="36" Height="34" ToolTip="{Binding Strings.TooltipAddPreset}">
-                                        <TextBlock Text="&#xE710;" FontFamily="{StaticResource IconFont}" FontSize="12"/>
-                                    </Button>
-                                    <Button Grid.Column="2" Click="EditGlobalPresetName_Click" Margin="8,0,0,0" Width="36" Height="34" ToolTip="{Binding Strings.TooltipEditPreset}">
-                                        <TextBlock Text="&#xE70F;" FontFamily="{StaticResource IconFont}" FontSize="12"/>
-                                    </Button>
-                                    <Button Grid.Column="3" Click="DeleteGlobalPreset_Click" Margin="8,0,0,0" Width="36" Height="34" ToolTip="{Binding Strings.TooltipDeletePreset}">
-                                        <TextBlock Text="&#xE74D;" FontFamily="{StaticResource IconFont}" FontSize="12"/>
-                                    </Button>
+                                    <TextBlock Text="{Binding Strings.HeaderPreset, FallbackValue='Global Presets'}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Button Click="AddGlobalPreset_Click" Margin="0,0,6,0" Padding="12,6" Height="32" Background="{StaticResource ControlBackground}" Cursor="Hand" ToolTip="{Binding Strings.TooltipAddPreset}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="&#xE710;" FontFamily="{StaticResource IconFont}" FontSize="11" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Strings.TooltipAddPreset, FallbackValue='New'}" FontSize="11.5" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Click="EditGlobalPresetName_Click" Margin="0,0,6,0" Width="34" Height="32" Background="{StaticResource ControlBackground}" Cursor="Hand" ToolTip="{Binding Strings.TooltipEditPreset}">
+                                            <TextBlock Text="&#xE70F;" FontFamily="{StaticResource IconFont}" FontSize="11"/>
+                                        </Button>
+                                        <Button Click="DeleteGlobalPreset_Click" Width="34" Height="32" Background="{StaticResource ControlBackground}" Cursor="Hand" ToolTip="{Binding Strings.TooltipDeletePreset}">
+                                            <TextBlock Text="&#xE74D;" FontFamily="{StaticResource IconFont}" FontSize="11"/>
+                                        </Button>
+                                    </StackPanel>
                                 </Grid>
+
+                                <ComboBox x:Name="PresetComboBox" Style="{StaticResource RoundedComboBox}" 
+                                          ItemsSource="{Binding GlobalPresets}" SelectedValue="{Binding SelectedGlobalPresetId}" 
+                                          SelectedValuePath="Id" DisplayMemberPath="Name" SelectionChanged="GlobalPreset_SelectionChanged" Height="34"/>
                             </StackPanel>
                         </Border>
 
@@ -863,11 +866,14 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Strings.LabelAssociatedProcesses}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
-                                    <Button Grid.Column="1" Click="ManageProcessRules_Click" Height="28" Padding="10,0" Background="{StaticResource ControlBackground}" Cursor="Hand" ToolTip="{Binding Strings.BtnAddProcessRule}">
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Strings.LabelAssociatedProcesses}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
+                                        <TextBlock Text="{Binding Strings.LabelProcessSwitch, FallbackValue='Automatically activates this preset when matching apps run.'}" FontSize="11.5" Foreground="{StaticResource TextTertiary}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Click="ManageProcessRules_Click" Height="32" Padding="12,0" Background="{StaticResource ControlBackground}" Cursor="Hand" ToolTip="{Binding Strings.BtnAddProcessRule}">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="&#xE710;" FontFamily="{StaticResource IconFont}" FontSize="11" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="{Binding Strings.BtnAddProcessRule}" FontSize="11" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Strings.BtnAddProcessRule}" FontSize="11.5" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
                                 </Grid>
@@ -881,11 +887,11 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Background="{StaticResource ControlBackground}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="14" Padding="10,4" Margin="0,0,8,8">
+                                                <Border Background="#20FFFFFF" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="14" Padding="12,5" Margin="0,0,8,8">
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBlock Text="{Binding ProcessName}" FontSize="12" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
                                                         <Button Command="{Binding DataContext.RemoveProcessRuleCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Margin="8,0,0,0" Padding="0" Width="16" Height="16" Cursor="Hand">
-                                                            <TextBlock Text="&#xE711;" FontFamily="{StaticResource IconFont}" FontSize="8" Foreground="{StaticResource TextSecondary}"/>
+                                                            <TextBlock Text="&#xE711;" FontFamily="{StaticResource IconFont}" FontSize="9" Foreground="{StaticResource TextTertiary}"/>
                                                         </Button>
                                                     </StackPanel>
                                                 </Border>
@@ -895,6 +901,7 @@
                                 </WrapPanel>
                             </StackPanel>
                         </Border>
+
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>

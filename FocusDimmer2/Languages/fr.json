@@ -76,7 +76,8 @@
   "MigrationGuideText": "Merci d'avoir acheté cette application. Pour assurer des mises à jour plus fluides à l'avenir, nous avons décidé d'unifier la structure de l'application en une \"Version Unifiée\".\n\nLes futures fonctionnalités Pro seront fournies sous forme de \"Module complémentaire (achat intégré)\" dans la Version Unifiée. Cependant, si vous avez déjà acheté cette version Pro, vous pouvez continuer à utiliser les fonctionnalités Pro gratuitement en suivant ces étapes :\n\n1. Installez la nouvelle \"Version Unifiée\" tout en gardant cette application (version Pro) installée.\n\n2. Vérifiez que les fonctionnalités Pro sont automatiquement débloquées dans la Version Unifiée.\n\n3. Après avoir confirmé le déblocage, vous pouvez désinstaller cette application en toute sécurité.\n\nVous pouvez continuer à utiliser cette application telle quelle, mais la page du magasin sera masquée pour les non-acheteurs et les mises à jour cesseront. Pour accéder aux dernières fonctionnalités, nous vous recommandons vivement de migrer vers la Version Unifiée.\n\nNous nous excusons pour tout inconvénient et vous remercions de votre soutien continu.",
   "MigrationOpenStorePage": "Ouvrir la page de la version unifiée",
   "NavMonitors": "Moniteurs",
-  "NavExclusions": "Exclusions d'apps",
+  "NavExclusions": "Exclusions",
+
   "NavHotkeys": "Raccourcis",
   "NavPresets": "Préréglages",
   "NavGeneral": "Général",

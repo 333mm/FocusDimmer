@@ -104,8 +104,8 @@ namespace FocusDimmer.Services
         
         // Navigation & New Sections
         public string NavMonitors { get; set; } = "Monitors";
-        public string NavExclusions { get; set; } = "App Exclusions";
-        public string NavHotkeys { get; set; } = "Shortcuts";
+        public string NavExclusions { get; set; } = "Exclusions";
+        public string NavHotkeys { get; set; } = "Hotkeys";
         public string NavPresets { get; set; } = "Presets";
         public string NavGeneral { get; set; } = "General";
         public string HeaderAdvancedBehavior { get; set; } = "Advanced Behavior";
@@ -113,6 +113,7 @@ namespace FocusDimmer.Services
         public string HeaderLanguage { get; set; } = "Language";
         public string SubHeaderLanguage { get; set; } = "Choose display language";
         public string SubHeaderGeneral { get; set; } = "App startup, behavior and language settings.";
+
         public string BtnMigrationInfo { get; set; } = "Migration Info";
         public string MsgStartupDisabledByUser { get; set; } = "Startup is disabled in Windows Settings or Task Manager.\nPlease enable Focus Dimmer in Windows 'Startup Apps' settings.";
         public string CheckCloseToTray { get; set; } = "Minimize to system tray on close (×)";
@@ -236,9 +237,10 @@ namespace FocusDimmer.Services
             TooltipSetAsDefault = "Set as Default Preset";
             MenuRename = "Rename";
             NavMonitors = "Monitors";
-            NavExclusions = "App Exclusions";
-            NavHotkeys = "Shortcuts";
+            NavExclusions = "Exclusions";
+            NavHotkeys = "Hotkeys";
             NavPresets = "Presets";
+
             NavGeneral = "General";
             HeaderAdvancedBehavior = "Advanced Behavior";
             SubHeaderHotkeys = "Configure keyboard shortcuts to quickly control dimming.";
@@ -331,9 +333,10 @@ namespace FocusDimmer.Services
             TooltipSetAsDefault = "既定のプリセットに設定";
             MenuRename = "名前を変更";
             NavMonitors = "モニター";
-            NavExclusions = "アプリ除外";
-            NavHotkeys = "ショートカット";
+            NavExclusions = "除外設定";
+            NavHotkeys = "ホットキー";
             NavPresets = "プリセット";
+
             NavGeneral = "一般設定";
             HeaderAdvancedBehavior = "高度な動作設定";
             SubHeaderHotkeys = "減光を素早く切り替えるキーボードショートカットを設定します。";

@@ -76,8 +76,9 @@
   "MigrationGuideText": "Vielen Dank, dass Sie diese App gekauft haben. Um künftige Updates reibungsloser zu gestalten, haben wir beschlossen, die App-Struktur in einer \"Vereinheitlichten Version\" zusammenzuführen.\n\nKünftige Pro-Funktionen werden als \"Add-on (In-App-Kauf)\" in der Vereinheitlichten Version bereitgestellt. Wenn Sie diese Pro-Version jedoch bereits gekauft haben, können Sie die Pro-Funktionen kostenlos weiter nutzen, indem Sie folgende Schritte befolgen:\n\n1. Installieren Sie die neue \"Vereinheitlichte Version\", während Sie diese App (Pro-Version) installiert lassen.\n\n2. Bestätigen Sie, dass die Pro-Funktionen in der Vereinheitlichten Version automatisch freigeschaltet sind.\n\n3. Nachdem Sie die Freischaltung bestätigt haben, können Sie diese App sicher deinstallieren.\n\nSie können diese App weiterhin so verwenden, wie sie ist, aber die Store-Seite wird für Nicht-Käufer ausgeblendet und Updates werden eingestellt. Um auf die neuesten Funktionen zugreifen zu können, empfehlen wir dringend, auf die Vereinheitlichte Version umzusteigen.\n\nWir entschuldigen uns für etwaige Unannehmlichkeiten und danken Ihnen für Ihre anhaltende Unterstützung.",
   "MigrationOpenStorePage": "Seite der vereinheitlichten Version öffnen",
   "NavMonitors": "Monitore",
-  "NavExclusions": "App-Ausschlüsse",
-  "NavHotkeys": "Tastenkürzel",
+  "NavExclusions": "Ausschlüsse",
+  "NavHotkeys": "Hotkeys",
+
   "NavPresets": "Voreinstellungen",
   "NavGeneral": "Allgemein",
   "HeaderAdvancedBehavior": "Erweitertes Verhalten",

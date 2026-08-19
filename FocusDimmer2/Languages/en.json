@@ -86,8 +86,9 @@
   "MigrationOpenStorePage": "Open Unified Version Store Page",
   "LabelCopyright": "Copyright © 2025 Focus Dimmer. All rights reserved.",
   "NavMonitors": "Monitors",
-  "NavExclusions": "App Exclusions",
-  "NavHotkeys": "Shortcuts",
+  "NavExclusions": "Exclusions",
+  "NavHotkeys": "Hotkeys",
+
   "NavPresets": "Presets",
   "NavGeneral": "General",
   "HeaderAdvancedBehavior": "Advanced Behavior",

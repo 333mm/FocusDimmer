@@ -86,8 +86,9 @@
   "MigrationOpenStorePage": "統合版のストアページを開く",
   "LabelCopyright": "Copyright © 2025 Focus Dimmer. All rights reserved.",
   "NavMonitors": "モニター",
-  "NavExclusions": "アプリ除外",
-  "NavHotkeys": "ショートカット",
+  "NavExclusions": "除外設定",
+  "NavHotkeys": "ホットキー",
+
   "NavPresets": "プリセット",
   "NavGeneral": "一般設定",
   "HeaderAdvancedBehavior": "高度な動作設定",

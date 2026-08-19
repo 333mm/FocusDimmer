@@ -19,10 +19,10 @@
         <Color x:Key="ColorTextTertiary">#9E9E9E</Color>
         <Color x:Key="ColorControlBg">#15FFFFFF</Color>
         <Color x:Key="ColorControlBgHover">#22FFFFFF</Color>
-        <Color x:Key="ColorCardBg">#0EFFFFFF</Color>
+        <Color x:Key="ColorCardBg">#12FFFFFF</Color>
         
-        <SolidColorBrush x:Key="WindowBackground" Color="#1E1E1E"/>
-        <SolidColorBrush x:Key="SidebarBackground" Color="#181818"/>
+        <SolidColorBrush x:Key="WindowBackground" Color="#D9161616"/>
+        <SolidColorBrush x:Key="SidebarBackground" Color="#60101010"/>
         <SolidColorBrush x:Key="CardBackground" Color="{StaticResource ColorCardBg}"/>
         <SolidColorBrush x:Key="ControlBackground" Color="{StaticResource ColorControlBg}"/>
         <SolidColorBrush x:Key="ControlBackgroundHover" Color="{StaticResource ColorControlBgHover}"/>
@@ -32,8 +32,9 @@
         <SolidColorBrush x:Key="TextPrimary" Color="{StaticResource ColorTextPrimary}"/>
         <SolidColorBrush x:Key="TextSecondary" Color="{StaticResource ColorTextSecondary}"/>
         <SolidColorBrush x:Key="TextTertiary" Color="{StaticResource ColorTextTertiary}"/>
-        <SolidColorBrush x:Key="BorderBrush" Color="#14FFFFFF"/>
-        <SolidColorBrush x:Key="CardBorderBrush" Color="#18FFFFFF"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#16FFFFFF"/>
+        <SolidColorBrush x:Key="CardBorderBrush" Color="#1CFFFFFF"/>
+
 
 
         <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>

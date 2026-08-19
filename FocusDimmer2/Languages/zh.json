@@ -77,8 +77,9 @@
   "MigrationOpenStorePage": "打开统一版商店页面",
   "LabelCopyright": "Copyright © 2025 Focus Dimmer. All rights reserved.",
   "NavMonitors": "显示器",
-  "NavExclusions": "应用排除",
+  "NavExclusions": "排除设置",
   "NavHotkeys": "快捷键",
+
   "NavPresets": "预设",
   "NavGeneral": "常规设置",
   "HeaderAdvancedBehavior": "高级行为设置",

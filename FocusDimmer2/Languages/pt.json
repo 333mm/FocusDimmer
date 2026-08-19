@@ -76,7 +76,8 @@
   "MigrationGuideText": "Obrigado por adquirir este aplicativo. Para garantir atualizações mais tranquilas no futuro, decidimos unificar a estrutura do aplicativo em uma \"Versão Unificada\".\n\nOs recursos Pro futuros serão fornecidos como um \"Complemento (In-App Purchase)\" na Versão Unificada. No entanto, se você já comprou esta versão Pro, pode continuar usando os recursos Pro gratuitamente seguindo estas etapas:\n\n1. Instale a nova \"Versão Unificada\" enquanto mantém este aplicativo (versão Pro) instalado.\n\n2. Confirme se os recursos Pro são desbloqueados automaticamente na Versão Unificada.\n\n3. Após confirmar o desbloqueio, você pode desinstalar este aplicativo com segurança.\n\nVocê pode continuar usando este aplicativo como está, mas a página da loja será ocultada de não compradores e as atualizações serão interrompidas. Para acessar os recursos mais recentes, recomendamos fortemente a migração para a Versão Unificada.\n\nPedimos desculpas por qualquer inconveniente e agradecemos seu apoio contínuo.",
   "MigrationOpenStorePage": "Abrir página da versão unificada",
   "NavMonitors": "Monitores",
-  "NavExclusions": "Exclusões de apps",
+  "NavExclusions": "Exclusões",
+
   "NavHotkeys": "Atalhos",
   "NavPresets": "Predefinições",
   "NavGeneral": "Geral",
