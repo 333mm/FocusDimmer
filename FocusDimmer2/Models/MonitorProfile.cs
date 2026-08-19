@@ -12,6 +12,8 @@ namespace FocusDimmer.Models
         [JsonIgnore] public string MonitorName { get; private set; } = "";
         public string DeviceName { get; set; } = "";
         [JsonIgnore] public WinForms.Screen? ScreenRef { get; private set; }
+        [JsonIgnore] public bool IsPrimary => ScreenRef?.Primary ?? true;
+
 
         private double _opacity = 65; public double Opacity { get => _opacity; set { _opacity = value; NotifyPropertyChanged(); } }
         private double _margin = 0; public double Margin { get => _margin; set { _margin = value; NotifyPropertyChanged(); } }

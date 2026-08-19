@@ -118,8 +118,12 @@ namespace FocusDimmer.Services
         public string CheckCloseToTray { get; set; } = "Minimize to system tray on close (×)";
         public string LabelLinkMonitors { get; set; } = "Link All Displays";
         public string TooltipLinkMonitors { get; set; } = "When enabled, changes to one display will automatically apply to all displays.";
+        public string HeaderMultiMonitorPro { get; set; } = "Multi-Display Dimming";
+        public string DescMultiMonitorPro { get; set; } = "Upgrade to Pro to dim and customize multiple displays simultaneously.";
+        public string BtnUpgradePro { get; set; } = "Upgrade to Pro";
         
         // Indexer for accessing properties by string name
+
         public string? this[string propertyName]
         {
             get
@@ -246,7 +250,11 @@ namespace FocusDimmer.Services
             CheckCloseToTray = "Minimize to system tray on close (×)";
             LabelLinkMonitors = "Link All Displays";
             TooltipLinkMonitors = "When enabled, changes to one display will automatically apply to all displays.";
+            HeaderMultiMonitorPro = "Multi-Display Dimming";
+            DescMultiMonitorPro = "Upgrade to Pro to dim and customize multiple displays simultaneously.";
+            BtnUpgradePro = "Upgrade to Pro";
         }
+
         private void SetDefaultJapanese()
         {
             AppTitle = "Focus Dimmer";
@@ -337,7 +345,11 @@ namespace FocusDimmer.Services
             CheckCloseToTray = "閉じるボタン（×）でタスクトレイに最小化する";
             LabelLinkMonitors = "全ディスプレイ連動";
             TooltipLinkMonitors = "有効にすると、すべてのディスプレイの設定が同時に連動して変更されます。";
+            HeaderMultiMonitorPro = "マルチモニター減光制御";
+            DescMultiMonitorPro = "接続された複数のディスプレイを個別に減光・連動制御するにはPRO版が必要です。";
+            BtnUpgradePro = "PROにアップグレード";
         }
+
         public event PropertyChangedEventHandler? PropertyChanged;
         void OnProp([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }

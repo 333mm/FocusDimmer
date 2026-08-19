@@ -89,5 +89,8 @@
   "MsgStartupDisabledByUser": "Le démarrage automatique est désactivé dans les paramètres Windows ou le Gestionnaire des tâches.\nVeuillez activer Focus Dimmer dans les paramètres 'Applications de démarrage' de Windows.",
   "CheckCloseToTray": "Minimiser dans la barre d'état à la fermeture (×)",
   "LabelLinkMonitors": "Lier tous les écrans",
-  "TooltipLinkMonitors": "Lorsqu'activé, les modifications apportées à un écran s'appliquent automatiquement à tous."
+  "TooltipLinkMonitors": "Lorsqu'activé, les modifications apportées à un écran s'appliquent automatiquement à tous.",
+  "HeaderMultiMonitorPro": "Contrôle d'atténuation multi-écrans",
+  "DescMultiMonitorPro": "Passez à la version PRO pour atténuer et personnaliser plusieurs écrans en même temps.",
+  "BtnUpgradePro": "Passer à la version PRO"
 }

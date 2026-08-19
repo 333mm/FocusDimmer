@@ -90,5 +90,8 @@
   "MsgStartupDisabledByUser": "自动启动已在 Windows 设置或任务管理器中被禁用。\n请在 Windows“启动应用”设置中启用 Focus Dimmer。",
   "CheckCloseToTray": "关闭按钮（×）最小化到系统托盘",
   "LabelLinkMonitors": "链接所有显示器",
-  "TooltipLinkMonitors": "启用后，对任一显示器的设置更改将自动同步到所有显示器。"
+  "TooltipLinkMonitors": "启用后，对任一显示器的设置更改将自动同步到所有显示器。",
+  "HeaderMultiMonitorPro": "多显示器调光控制",
+  "DescMultiMonitorPro": "升级到 PRO 版以同时调暗和自定义多个显示器。",
+  "BtnUpgradePro": "升级到 PRO"
 }

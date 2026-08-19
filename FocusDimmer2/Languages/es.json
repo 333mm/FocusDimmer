@@ -89,5 +89,8 @@
   "MsgStartupDisabledByUser": "El inicio automático está deshabilitado en la Configuración de Windows o en el Administrador de tareas.\nHabilita Focus Dimmer en la configuración de 'Aplicaciones de inicio' de Windows.",
   "CheckCloseToTray": "Minimizar a la bandeja al cerrar (×)",
   "LabelLinkMonitors": "Vincular todas las pantallas",
-  "TooltipLinkMonitors": "Al activarlo, los cambios en una pantalla se aplicarán automáticamente a todas."
+  "TooltipLinkMonitors": "Al activarlo, los cambios en una pantalla se aplicarán automáticamente a todas.",
+  "HeaderMultiMonitorPro": "Control de atenuación multipantalla",
+  "DescMultiMonitorPro": "Actualiza a PRO para atenuar y personalizar varias pantallas a la vez.",
+  "BtnUpgradePro": "Actualizar a PRO"
 }

@@ -406,20 +406,9 @@ namespace FocusDimmer
 
             InitializeMonitors();
 
-            // フリー版の場合は必ずメインモニターを選択状態にする。
-            // Pro版でも、何も選択されていない状態(不具合)を防ぐため、デフォルトで0番目を選択する。
-            if (MonitorTabs.Items.Count > 0)
+            if (MonitorTabs.Items.Count > 0 && MonitorTabs.SelectedIndex < 0)
             {
-                // フリー版は強制的に0(Primary)に戻す
-                if (IsFreeVersion)
-                {
-                    MonitorTabs.SelectedIndex = 0;
-                }
-                // 何も選択されていない場合は0を選択
-                else if (MonitorTabs.SelectedIndex < 0)
-                {
-                    MonitorTabs.SelectedIndex = 0;
-                }
+                MonitorTabs.SelectedIndex = 0;
             }
 
             RegisterAllHotkeys();
@@ -454,8 +443,6 @@ namespace FocusDimmer
 
             foreach (var screen in WinForms.Screen.AllScreens)
             {
-                if (IsFreeVersion && !screen.Primary) continue;
-
                 var profile = new MonitorProfile(screen);
                 var saved = _appSettings.Profiles.FirstOrDefault(p => p.DeviceName == screen.DeviceName);
                 if (saved != null) profile.ApplySettings(saved);
@@ -472,10 +459,16 @@ namespace FocusDimmer
                 };
 
                 MonitorProfiles.Add(profile);
-                var overlay = new DimmerOverlay(profile);
-                _overlays.Add(overlay);
-                overlay.Show();
+
+                // フリー版の場合はプライマリモニターのみ減光オーバーレイを生成
+                if (!IsFreeVersion || screen.Primary)
+                {
+                    var overlay = new DimmerOverlay(profile);
+                    _overlays.Add(overlay);
+                    overlay.Show();
+                }
             }
+
             
             // Load global presets
             // Capture current selection to restore later

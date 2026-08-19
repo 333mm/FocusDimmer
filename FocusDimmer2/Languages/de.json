@@ -89,5 +89,8 @@
   "MsgStartupDisabledByUser": "Der Autostart ist in den Windows-Einstellungen oder im Task-Manager deaktiviert.\nBitte aktivieren Sie Focus Dimmer in den Windows-Einstellungen für 'Autostart-Apps'.",
   "CheckCloseToTray": "Beim Schließen (×) in Taskleiste minimieren",
   "LabelLinkMonitors": "Alle Monitore verknüpfen",
-  "TooltipLinkMonitors": "Wenn aktiviert, werden Änderungen an einem Monitor automatisch auf alle Monitore übertragen."
+  "TooltipLinkMonitors": "Wenn aktiviert, werden Änderungen an einem Monitor automatisch auf alle Monitore übertragen.",
+  "HeaderMultiMonitorPro": "Multi-Monitor-Dimmsteuerung",
+  "DescMultiMonitorPro": "Führen Sie ein Upgrade auf PRO durch, um mehrere Monitore gleichzeitig zu dimmen und anzupassen.",
+  "BtnUpgradePro": "Auf PRO upgraden"
 }

@@ -89,5 +89,8 @@
   "MsgStartupDisabledByUser": "A inicialização automática está desativada nas Configurações do Windows ou no Gerenciador de Tarefas.\nAtive o Focus Dimmer nas configurações de 'Aplicativos de Inicialização' do Windows.",
   "CheckCloseToTray": "Minimizar para a bandeja ao fechar (×)",
   "LabelLinkMonitors": "Vincular todas as telas",
-  "TooltipLinkMonitors": "Quando ativado, as alterações em uma tela serão aplicadas automaticamente a todas."
+  "TooltipLinkMonitors": "Quando ativado, as alterações em uma tela serão aplicadas automaticamente a todas.",
+  "HeaderMultiMonitorPro": "Controle de escurecimento multitela",
+  "DescMultiMonitorPro": "Atualize para PRO para escurecer e personalizar várias telas simultaneamente.",
+  "BtnUpgradePro": "Atualizar para PRO"
 }
