@@ -77,7 +77,7 @@
                     <!-- Nav: Monitors -->
                     <RadioButton Style="{StaticResource NavRadioButtonStyle}" Tag="Monitors" IsChecked="True" Checked="NavButton_Checked">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE7F4;" FontFamily="{StaticResource IconFont}" FontSize="15" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE7F4;" FontFamily="{StaticResource IconFont}" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding Strings.NavMonitors, FallbackValue='Monitors'}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
@@ -85,42 +85,46 @@
                     <!-- Nav: Exclusions -->
                     <RadioButton Style="{StaticResource NavRadioButtonStyle}" Tag="Exclusions" Checked="NavButton_Checked">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE8B9;" FontFamily="{StaticResource IconFont}" FontSize="15" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Strings.NavExclusions, FallbackValue='App Exclusions'}" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE8B9;" FontFamily="{StaticResource IconFont}" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Strings.NavExclusions, FallbackValue='Exclusions'}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
 
-                    <!-- Nav: Shortcuts -->
+                    <!-- Nav: Hotkeys -->
                     <RadioButton Style="{StaticResource NavRadioButtonStyle}" Tag="Hotkeys" Checked="NavButton_Checked">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE765;" FontFamily="{StaticResource IconFont}" FontSize="15" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Strings.NavHotkeys, FallbackValue='Shortcuts'}" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE765;" FontFamily="{StaticResource IconFont}" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Strings.NavHotkeys, FallbackValue='Hotkeys'}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
 
                     <!-- Nav: Presets (PRO) -->
                     <RadioButton Style="{StaticResource NavRadioButtonStyle}" Tag="Presets" Checked="NavButton_Checked">
-                        <Grid Width="190">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock Text="&#xE71B;" FontFamily="{StaticResource IconFont}" FontSize="15" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="&#xE71B;" FontFamily="{StaticResource IconFont}" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding Strings.NavPresets, FallbackValue='Presets'}" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <Border Visibility="{Binding FreeBannerVisibility}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    Background="#1560CDFF" BorderBrush="#3560CDFF" BorderThickness="1" CornerRadius="3" Padding="5,1">
+                            <Border Grid.Column="1" Visibility="{Binding FreeBannerVisibility}" VerticalAlignment="Center"
+                                    Background="#1560CDFF" BorderBrush="#3560CDFF" BorderThickness="1" CornerRadius="3" Padding="4,1" Margin="4,0,0,0">
                                 <TextBlock Text="🔒 PRO" Foreground="{StaticResource AccentColor}" FontWeight="Bold" FontSize="8"/>
                             </Border>
                         </Grid>
-
                     </RadioButton>
 
                     <!-- Nav: General -->
                     <RadioButton Style="{StaticResource NavRadioButtonStyle}" Tag="General" Checked="NavButton_Checked">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE713;" FontFamily="{StaticResource IconFont}" FontSize="15" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE713;" FontFamily="{StaticResource IconFont}" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding Strings.NavGeneral, FallbackValue='General'}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </RadioButton>
                 </StackPanel>
+
             </Grid>
         </Border>
 
