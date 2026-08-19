@@ -35,13 +35,14 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Lite|AnyCPU'">
 		<Optimize>True</Optimize>
-		<DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+		<DefineConstants>$(DefineConstants);LITE_VERSION;DEBUG</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Lite|x64'">
 		<Optimize>True</Optimize>
-		<DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+		<DefineConstants>$(DefineConstants);LITE_VERSION;DEBUG</DefineConstants>
 	</PropertyGroup>
+
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Pro|AnyCPU'">
 		<Optimize>True</Optimize>

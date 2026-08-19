@@ -49,11 +49,14 @@ namespace FocusDimmer
         private readonly StoreService _storeService = new StoreService();
         private bool _isPro = false;
         public bool IsLegacyPro =>
-#if LEGACY_PRO
+#if LITE_VERSION
+            false;
+#elif LEGACY_PRO
             true;
 #else
             false;
 #endif
+
         public bool IsPro
         {
             get => _isPro;
@@ -369,7 +372,10 @@ namespace FocusDimmer
 
         private async void InitializeAppAsync()
         {
-#if DEBUG
+#if LITE_VERSION
+            // Lite構成時は完全にフリー版として動作を再現
+            IsPro = false;
+#elif DEBUG
             // デバッグ時は構成に応じて状態を強制設定
 #if LEGACY_PRO
             IsPro = true;
@@ -395,6 +401,7 @@ namespace FocusDimmer
             IsPro = _storeService.IsPro;
 #endif
 #endif
+
             NotifyPropertyChanged(nameof(Strings));
 
             InitializeMonitors();
