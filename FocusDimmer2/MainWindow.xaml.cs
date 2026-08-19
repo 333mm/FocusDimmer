@@ -324,10 +324,12 @@ namespace FocusDimmer
             SelectedGlobalPresetId = _appSettings.SelectedPresetId;
             DefaultPresetId = _appSettings.DefaultPresetId;
             
-            // Notify exclusion lists
+            // Notify exclusion lists and general settings
             NotifyPropertyChanged(nameof(IgnoreList));
             NotifyPropertyChanged(nameof(AlwaysBrightList));
             NotifyPropertyChanged(nameof(AlwaysDarkList));
+            NotifyPropertyChanged(nameof(CloseToTray));
+            NotifyPropertyChanged(nameof(AreMonitorsLinked));
             
             // Restore Window Size/Position
             if (_appSettings.WindowWidth > 0 && _appSettings.WindowHeight > 0)
@@ -608,26 +610,29 @@ namespace FocusDimmer
                 double t = (this.ActualWidth > 0) ? this.Top : _appSettings.WindowTop;
 
                 var settings = new AppSettings 
-        { 
-            Profiles = new List<MonitorProfile>(MonitorProfiles), 
-            AutoStart = AutoStartCheck.IsChecked == true, 
-            RunAsAdmin = false,
-            // Save window state
-            WindowWidth = w,
-            WindowHeight = h,
-            WindowLeft = l,
-            WindowTop = t,
-            // License migration persistence - carry over from existing settings
-            IsLegacyMigrated = _appSettings.IsLegacyMigrated,
-            IsLegacyBannerDismissed = _appSettings.IsLegacyBannerDismissed,
-            // Global Presets
-            Presets = new List<Preset>(GlobalPresets),
-            SelectedPresetId = SelectedGlobalPresetId,
-            DefaultPresetId = DefaultPresetId,
-            IgnoreList = IgnoreList,
-            AlwaysBrightList = AlwaysBrightList,
-            AlwaysDarkList = AlwaysDarkList
-        };
+                { 
+                    Profiles = new List<MonitorProfile>(MonitorProfiles), 
+                    AutoStart = AutoStartCheck.IsChecked == true, 
+                    RunAsAdmin = false,
+                    CloseToTray = CloseToTray,
+                    AreMonitorsLinked = AreMonitorsLinked,
+                    // Save window state
+                    WindowWidth = w,
+                    WindowHeight = h,
+                    WindowLeft = l,
+                    WindowTop = t,
+                    // License migration persistence - carry over from existing settings
+                    IsLegacyMigrated = _appSettings.IsLegacyMigrated,
+                    IsLegacyBannerDismissed = _appSettings.IsLegacyBannerDismissed,
+                    // Global Presets
+                    Presets = new List<Preset>(GlobalPresets),
+                    SelectedPresetId = SelectedGlobalPresetId,
+                    DefaultPresetId = DefaultPresetId,
+                    IgnoreList = IgnoreList,
+                    AlwaysBrightList = AlwaysBrightList,
+                    AlwaysDarkList = AlwaysDarkList
+                };
+
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(_settingsPath, json);
