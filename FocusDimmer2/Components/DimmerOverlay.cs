@@ -14,6 +14,7 @@ using System.Windows.Threading;
 using FocusDimmer.Models;
 using FocusDimmer.Services;
 using FocusDimmer.Helpers;
+using FocusDimmer.ViewModels;
 
 namespace FocusDimmer.Components
 {
@@ -112,9 +113,10 @@ namespace FocusDimmer.Components
 
             LinkedProfile.PropertyChanged += OnProfilePropertyChanged;
             
-            if (System.Windows.Application.Current?.MainWindow is MainWindow mainWindow)
+            var vm = GetViewModel();
+            if (vm != null)
             {
-                mainWindow.PropertyChanged += OnMainWindowPropertyChanged;
+                vm.PropertyChanged += OnViewModelPropertyChanged;
             }
 
             _delayTimer = new DispatcherTimer();
@@ -123,6 +125,15 @@ namespace FocusDimmer.Components
             _fadeTimer = new DispatcherTimer();
             _fadeTimer.Interval = TimeSpan.FromMilliseconds(16); // ~60fps
             _fadeTimer.Tick += FadeTimer_Tick;
+        }
+
+        private static MainViewModel? GetViewModel()
+        {
+            if (System.Windows.Application.Current?.MainWindow is MainWindow mw && mw.DataContext is MainViewModel vm)
+            {
+                return vm;
+            }
+            return null;
         }
 
         private void OnProfilePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -138,11 +149,11 @@ namespace FocusDimmer.Components
             }
         }
 
-        private void OnMainWindowPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(MainWindow.AlwaysBrightList) ||
-                e.PropertyName == nameof(MainWindow.AlwaysDarkList) ||
-                e.PropertyName == nameof(MainWindow.IgnoreList))
+            if (e.PropertyName == nameof(MainViewModel.AlwaysBrightList) ||
+                e.PropertyName == nameof(MainViewModel.AlwaysDarkList) ||
+                e.PropertyName == nameof(MainViewModel.IgnoreList))
             {
                 InvalidateCache();
             }
@@ -154,10 +165,12 @@ namespace FocusDimmer.Components
             _disposed = true;
 
             LinkedProfile.PropertyChanged -= OnProfilePropertyChanged;
-            if (System.Windows.Application.Current?.MainWindow is MainWindow mainWindow)
+            var vm = GetViewModel();
+            if (vm != null)
             {
-                mainWindow.PropertyChanged -= OnMainWindowPropertyChanged;
+                vm.PropertyChanged -= OnViewModelPropertyChanged;
             }
+
             
             _delayTimer?.Stop();
             _fadeTimer?.Stop();
@@ -602,11 +615,13 @@ namespace FocusDimmer.Components
 
             string currentAlwaysBright = "";
             string currentAlwaysDark = "";
-            if (System.Windows.Application.Current?.MainWindow is MainWindow mainWindow)
+            var vm = GetViewModel();
+            if (vm != null)
             {
-                currentAlwaysBright = mainWindow.AlwaysBrightList;
-                currentAlwaysDark = mainWindow.AlwaysDarkList;
+                currentAlwaysBright = vm.AlwaysBrightList;
+                currentAlwaysDark = vm.AlwaysDarkList;
             }
+
 
             bool isSame = (targetHwnd == _lastTargetHwnd) &&
                           (currentRect.Equals(_lastTargetRect)) &&
@@ -689,9 +704,10 @@ namespace FocusDimmer.Components
 
         private bool IsAlwaysDarkWindow(IntPtr hwnd)
         {
-            if (System.Windows.Application.Current?.MainWindow is MainWindow main)
+            var vm = GetViewModel();
+            if (vm != null)
             {
-                if (IsProcessInList(hwnd, main.AlwaysDarkList)) return true;
+                if (IsProcessInList(hwnd, vm.AlwaysDarkList)) return true;
             }
 
             StringBuilder sb = new StringBuilder(256);
@@ -717,10 +733,12 @@ namespace FocusDimmer.Components
 
         private bool IsAlwaysBrightWindow(IntPtr hwnd)
         {
-            if (System.Windows.Application.Current?.MainWindow is MainWindow main)
+            var vm = GetViewModel();
+            if (vm != null)
             {
-                if (IsProcessInList(hwnd, main.AlwaysBrightList)) return true;
+                if (IsProcessInList(hwnd, vm.AlwaysBrightList)) return true;
             }
+
 
             StringBuilder sb = new StringBuilder(256);
             NativeMethods.GetClassName(hwnd, sb, sb.Capacity);
