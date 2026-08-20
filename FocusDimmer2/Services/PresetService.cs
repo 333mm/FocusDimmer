@@ -91,6 +91,38 @@ namespace FocusDimmer.Services
             }
         }
 
+        public void PropagateAllToLinkedProfiles(MonitorProfile source, IEnumerable<MonitorProfile> allProfiles)
+
+        {
+            _isApplyingPreset = true;
+            try
+            {
+                foreach (var p in allProfiles)
+                {
+                    if (p == source) continue;
+                    p.Opacity = source.Opacity;
+                    p.Margin = source.Margin;
+                    p.DelayDarken = source.DelayDarken;
+                    p.DurationDarken = source.DurationDarken;
+                    p.DurationBrighten = source.DurationBrighten;
+                    p.ExcludeTaskbar = source.ExcludeTaskbar;
+                    p.ExcludeTopmost = source.ExcludeTopmost;
+                    p.UseTightFrame = source.UseTightFrame;
+                    p.DimEntirelyWhenInactive = source.DimEntirelyWhenInactive;
+                    p.DimDesktopOnly = source.DimDesktopOnly;
+                    p.DimWhenIdle = source.DimWhenIdle;
+                    p.IdleTimeout = source.IdleTimeout;
+                    p.IdleDimOpacity = source.IdleDimOpacity;
+                    p.OverlayColorHex = source.OverlayColorHex;
+                }
+            }
+            finally
+            {
+                _isApplyingPreset = false;
+            }
+        }
+
+
         public string? FindMatchingPresetId(string processName, IEnumerable<Preset> presets, string defaultPresetId, string currentSelectedId)
         {
             if (string.IsNullOrEmpty(processName)) return null;

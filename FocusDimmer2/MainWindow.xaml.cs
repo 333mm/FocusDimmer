@@ -343,26 +343,13 @@ namespace FocusDimmer
 
         private void LinkMonitors_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.AreMonitorsLinked = !ViewModel.AreMonitorsLinked;
             if (ViewModel.AreMonitorsLinked && MonitorTabs.SelectedItem is MonitorProfile current)
             {
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.Opacity), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.Margin), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.DelayDarken), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.DurationDarken), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.DurationBrighten), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.ExcludeTaskbar), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.ExcludeTopmost), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.UseTightFrame), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.DimEntirelyWhenInactive), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.DimDesktopOnly), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.DimWhenIdle), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.IdleTimeout), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.IdleDimOpacity), ViewModel.MonitorProfiles);
-                _presetService.PropagateToLinkedProfiles(current, nameof(MonitorProfile.OverlayColorHex), ViewModel.MonitorProfiles);
+                _presetService.PropagateAllToLinkedProfiles(current, ViewModel.MonitorProfiles);
             }
             RequestSaveSettings();
         }
+
 
         private void PickColor_Click(object sender, RoutedEventArgs e)
         {
