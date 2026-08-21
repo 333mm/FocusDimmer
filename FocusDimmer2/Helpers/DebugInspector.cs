@@ -35,14 +35,27 @@ namespace FocusDimmer.Helpers
         private List<WindowData> _currentWindows = new();
         private bool _isSelectionMode = false;
 
+        public bool IsTracking => _isTracking;
+
+        public void Toggle()
+        {
+            if (_isTracking) Stop();
+            else Start();
+        }
+
         public void Start()
         {
-            if (_isTracking) return;
+            if (_isTracking)
+            {
+                Stop();
+            }
             _isTracking = true;
             _isSelectionMode = false;
             _window = new DebugInspectorWindow();
+            _window.Closed += (s, e) => Stop();
             _window.WindowSelected += (s, data) => 
             {
+                Stop();
                 SelectedWindowCaptured?.Invoke(this, data);
             };
             
@@ -59,7 +72,7 @@ namespace FocusDimmer.Helpers
                 if (curModule != null && curModule.ModuleName != null)
                 {
                     _hookId = NativeMethods.SetWindowsHookEx(NativeMethods.WH_MOUSE_LL, _mouseProc,
-                        NativeMethods. GetModuleHandle(curModule.ModuleName), 0);
+                        NativeMethods.GetModuleHandle(curModule.ModuleName), 0);
                 }
             }
 
@@ -69,7 +82,7 @@ namespace FocusDimmer.Helpers
 
         public void Stop()
         {
-            if (!_isTracking) return;
+            if (!_isTracking && _window == null && _hookId == IntPtr.Zero) return;
             _isTracking = false;
             _isSelectionMode = false;
             _timer.Stop();
@@ -85,10 +98,15 @@ namespace FocusDimmer.Helpers
                 NativeMethods.RemoveProp(_hwndSelf, "FocusDimmerInspector");
             }
 
-            _window?.Close();
-            _window = null;
+            if (_window != null)
+            {
+                var win = _window;
+                _window = null;
+                try { win.Close(); } catch { }
+            }
             _hwndSelf = IntPtr.Zero;
         }
+
 
         private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
@@ -127,9 +145,11 @@ namespace FocusDimmer.Helpers
             // Close on ESC
             if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Escape))
             {
+                Stop();
                 StopRequested?.Invoke(this, EventArgs.Empty);
                 return;
             }
+
 
             UpdateInspection();
         }

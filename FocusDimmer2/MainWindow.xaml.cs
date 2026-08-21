@@ -416,8 +416,10 @@ namespace FocusDimmer
             {
                 if (string.IsNullOrWhiteSpace(currentList)) setter(ViewModel, processName);
                 else setter(ViewModel, currentList.Trim() + ", " + processName);
+                RequestSaveSettings();
             }
         }
+
 
         private async void AutoStart_Checked(object sender, RoutedEventArgs e)
         {
@@ -462,19 +464,19 @@ namespace FocusDimmer
                         actionDialog.Owner = this;
                         if (actionDialog.ShowDialog() == true)
                         {
-                            if (actionDialog.ActionType == "ignore")
+                            if (string.Equals(actionDialog.ActionType, "Ignore", StringComparison.OrdinalIgnoreCase))
                                 AddProcessToList(vm => vm.IgnoreList, (vm, v) => vm.IgnoreList = v, data.ProcessName);
-                            else if (actionDialog.ActionType == "bright")
+                            else if (string.Equals(actionDialog.ActionType, "Bright", StringComparison.OrdinalIgnoreCase))
                                 AddProcessToList(vm => vm.AlwaysBrightList, (vm, v) => vm.AlwaysBrightList = v, data.ProcessName);
-                            else if (actionDialog.ActionType == "dark")
+                            else if (string.Equals(actionDialog.ActionType, "Dark", StringComparison.OrdinalIgnoreCase))
                                 AddProcessToList(vm => vm.AlwaysDarkList, (vm, v) => vm.AlwaysDarkList = v, data.ProcessName);
                         }
-
                     });
                 };
             }
-            _debugInspector.Start();
+            _debugInspector.Toggle();
         }
+
 
         private void MigrationInfo_Click(object sender, RoutedEventArgs e)
         {
