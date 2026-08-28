@@ -30,25 +30,6 @@
 
 ---
 
-## 🛠️ 開発・ビルド環境 / Development & Build
-
-### 必要環境
-- Windows 10 (1809以降) / Windows 11
-- .NET 10 SDK
-- Visual Studio 2022 または .NET CLI
-
-### ビルド手順
-```bash
-# リポジトリのクローン
-git clone https://github.com/333mm/FocusDimmer.git
-cd FocusDimmer
-
-# プロジェクトのビルド
-dotnet build FocusDimmer2/FocusDimmer.csproj
-```
-
----
-
 ## 📄 ライセンス / License
 
 本プロジェクトのソースコードは、学習・研究・個人利用を目的として公開されています（Source-Available）。
