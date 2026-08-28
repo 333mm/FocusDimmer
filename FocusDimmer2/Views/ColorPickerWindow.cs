@@ -19,6 +19,7 @@ namespace FocusDimmer.Views
     public partial class ColorPickerWindow : Components.FluentWindow, INotifyPropertyChanged
     {
         public Color SelectedColor { get; private set; }
+        public Services.LocalizationService Strings { get; }
 
         private double _hue = 0;
         private double _sat = 1;
@@ -26,8 +27,9 @@ namespace FocusDimmer.Views
 
         private bool _isUpdating = false;
 
-        public ColorPickerWindow(Color initialColor)
+        public ColorPickerWindow(Color initialColor, Services.LocalizationService? strings = null)
         {
+            Strings = strings ?? new Services.LocalizationService();
             InitializeComponent();
             SelectedColor = initialColor;
             

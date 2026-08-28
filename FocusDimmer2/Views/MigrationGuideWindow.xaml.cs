@@ -9,14 +9,15 @@ namespace FocusDimmer.Views
         private Services.LocalizationService _strings;
         private const string UnifiedAppId = "9NXHXPNJL79X";
 
+        public Services.LocalizationService Strings => _strings;
         public string MigrationGuideText => _strings?.MigrationGuideText ?? "";
         public string MigrationOpenStorePage => _strings?.MigrationOpenStorePage ?? "";
 
         public MigrationGuideWindow(Services.LocalizationService strings)
         {
-            InitializeComponent();
             _strings = strings;
             DataContext = this;
+            InitializeComponent();
         }
 
         private void OpenStore_Click(object sender, RoutedEventArgs e)

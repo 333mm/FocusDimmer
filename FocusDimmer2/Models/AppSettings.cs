@@ -16,7 +16,8 @@ namespace FocusDimmer.Models
         public double WindowLeft { get; set; } = -10000; // Sentinel value
         public double WindowTop { get; set; } = -10000;  // Sentinel value
 
-        // License migration persistence
+        // License migration & purchase persistence
+        public bool IsProPurchased { get; set; } = false;
         public bool IsLegacyMigrated { get; set; } = false;
         public bool IsLegacyBannerDismissed { get; set; } = false;
         

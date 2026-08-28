@@ -1,0 +1,40 @@
+# Focus Dimmer License
+
+Copyright (c) 2025-2026 sanmiri. All rights reserved.
+
+---
+
+### English
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to view,
+download, compile, and modify the Software for **personal, educational, and research purposes**,
+subject to the following conditions:
+
+1. **Non-Commercial & Store Protection (商用利用・ストア再配布の制限)**:
+   - You may NOT sell, sublicense, repackage, or distribute compiled binaries (or modified versions of the Software) to any public application distribution channels, including but not limited to the Microsoft Store, Steam, or other commercial marketplaces, without prior written permission from the copyright holder.
+2. **Trademark & Asset Protection (商標・ロゴアセットの保護)**:
+   - The names "Focus Dimmer", "sanmiri", and all associated icons, logos, artwork, and branding assets are proprietary. You may not use these trademarks or branded assets in derivative works without explicit written permission.
+3. **Contributions (コントリビューション)**:
+   - By submitting pull requests, issues, or code contributions to this repository, you agree to license your contributions under these same terms and grant the project maintainer the right to integrate and distribute your changes in official releases.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+### 日本語（参考約款）
+
+本ソフトウェアおよび関連ドキュメント（以下「本ソフトウェア」）の複製を取得したすべての者に対し、**個人的な利用、学習、研究の目的**において、本ソフトウェアの閲覧、ビルド、改変を無償で許可します。ただし、以下の条件に従うものとします。
+
+1. **商用利用およびストア再配布の禁止**:
+   - 著作権者の書面による事前の許可なく、本ソフトウェア（またはその改変版）のバイナリを Microsoft Store、Steam などの公開アプリストアや商用チャンネルへ公開・再配布・販売・再ライセンスすることは禁止します。
+2. **商標およびアセットの保護**:
+   - アプリ名「Focus Dimmer」、開発者名「sanmiri」、ならびに関連するアイコン、ロゴ画像、グラフィックアセットに関する権利は著作権者に帰属します。派生版においてこれらを使用することはできません。
+3. **免責事項**:
+   - 本ソフトウェアは「現状有姿」で提供され、商品性、特定目的への適合性、権利非侵害性を含め、明示・黙示を問わずいかなる保証もいたしません。

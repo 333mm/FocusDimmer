@@ -42,7 +42,7 @@ namespace FocusDimmer.Services
             }
         }
 
-        public async Task<bool> InitializeAsync(FocusDimmer.Models.AppSettings settings)
+        public async Task<bool> InitializeAsync(FocusDimmer.Models.AppSettings settings, IntPtr windowHandle = default)
         {
             System.Diagnostics.Debug.WriteLine($"[StoreService] InitializeAsync called.");
             bool isPkg = IsPackaged();
@@ -53,9 +53,22 @@ namespace FocusDimmer.Services
 
             try
             {
+                // 1. Check local Pro purchase cache / token first (allows instant Pro unlock & offline capability)
+                if (settings.IsProPurchased || CheckProToken())
+                {
+                    _isProSubscribed = true;
+                    if (!settings.IsProPurchased)
+                    {
+                        settings.IsProPurchased = true;
+                        saved = true;
+                    }
+                    SaveProToken();
+                    System.Diagnostics.Debug.WriteLine($"[StoreService] Pro purchase cached token found.");
+                }
+
                 System.Diagnostics.Debug.WriteLine($"[StoreService] Checking IsLegacyMigrated: {settings.IsLegacyMigrated}");
                 
-                // Check if already migrated
+                // 2. Check if legacy Pro already migrated
                 if (settings.IsLegacyMigrated)
                 {
                     _isLegacyProDetected = true;
@@ -88,21 +101,55 @@ namespace FocusDimmer.Services
                     }
                 }
 
+                // 3. Online Store Context verification
                 if (_context != null)
                 {
+                    if (windowHandle != IntPtr.Zero)
+                    {
+                        try
+                        {
+                            WinRT.Interop.InitializeWithWindow.Initialize(_context, windowHandle);
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[StoreService] InitializeWithWindow failed: {ex.Message}");
+                        }
+                    }
+
                     // アドオン購入状態のチェック
                     _appLicense = await _context.GetAppLicenseAsync();
 
                     // Add-on licenses are in the AddOnLicenses collection
-                    if (_appLicense != null && _appLicense.AddOnLicenses.TryGetValue(ProUpgradeAddOnId, out var license) && license.IsActive)
+                    if (_appLicense != null)
                     {
-                        _isProSubscribed = true;
+                        if (_appLicense.AddOnLicenses.TryGetValue(ProUpgradeAddOnId, out var license) && license.IsActive)
+                        {
+                            _isProSubscribed = true;
+                            if (!settings.IsProPurchased)
+                            {
+                                settings.IsProPurchased = true;
+                                saved = true;
+                            }
+                            SaveProToken();
+                        }
+                        else if (_appLicense.IsActive && !_appLicense.IsTrial && !string.IsNullOrEmpty(_appLicense.ExtendedJsonData))
+                        {
+                            // If base app license has full entitlement
+                            _isProSubscribed = true;
+                            settings.IsProPurchased = true;
+                            SaveProToken();
+                        }
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // エラー時は安全のためLite版として扱う
+                System.Diagnostics.Debug.WriteLine($"[StoreService] InitializeAsync error: {ex.Message}");
+                // If local token or settings indicated Pro, keep it active even if online check threw an exception
+                if (settings.IsProPurchased || CheckProToken())
+                {
+                    _isProSubscribed = true;
+                }
             }
             return saved;
         }
@@ -162,6 +209,7 @@ namespace FocusDimmer.Services
                 if (result.Status == StorePurchaseStatus.Succeeded || result.Status == StorePurchaseStatus.AlreadyPurchased)
                 {
                     _isProSubscribed = true;
+                    SaveProToken();
                 }
                 
                 if (result.ExtendedError != null)
@@ -175,6 +223,40 @@ namespace FocusDimmer.Services
             {
                 // 購入失敗
                 return (StorePurchaseStatus.ServerError, ex);
+            }
+        }
+
+        public void SaveProToken()
+        {
+            try
+            {
+                string docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string folder = System.IO.Path.Combine(docs, "FocusDimmer");
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+
+                string path = System.IO.Path.Combine(folder, ".pro_token");
+                if (!File.Exists(path))
+                {
+                    File.WriteAllText(path, "PRO_UNLOCKED_BY_STORE_PURCHASE");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[StoreService] Failed to save pro token: {ex.Message}");
+            }
+        }
+
+        public bool CheckProToken()
+        {
+            try
+            {
+                string docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string path = System.IO.Path.Combine(docs, "FocusDimmer", ".pro_token");
+                return File.Exists(path);
+            }
+            catch
+            {
+                return false;
             }
         }
 

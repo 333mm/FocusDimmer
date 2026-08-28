@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:components="clr-namespace:FocusDimmer.Components"
         mc:Ignorable="d"
-        Title="{Binding DataContext.Strings.TitleColorPicker, RelativeSource={RelativeSource Self}}"
+        Title="{Binding Strings.TitleColorPicker, RelativeSource={RelativeSource Self}}"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
@@ -137,7 +137,7 @@
 
         <!-- Buttons -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="16">
-            <Button Content="Cancel" Click="CloseButton_Click" Width="80" Height="32" Margin="0,0,10,0"/>
+            <Button Content="{Binding Strings.BtnCancel, RelativeSource={RelativeSource AncestorType=Window}}" Click="CloseButton_Click" Width="80" Height="32" Margin="0,0,10,0"/>
             <Button Content="OK" Click="OkButton_Click" Style="{StaticResource AccentButtonStyle}" Width="80" Height="32"/>
         </StackPanel>
     </Grid>

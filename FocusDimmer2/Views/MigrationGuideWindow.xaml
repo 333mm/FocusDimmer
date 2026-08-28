@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FocusDimmer.Views"
         xmlns:components="clr-namespace:FocusDimmer.Components"
         mc:Ignorable="d"
-        Title="Migration Guide" Height="500" Width="600"
+        Title="{Binding Strings.TitleMigrationGuide}" Height="500" Width="600"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Style="{StaticResource FluentWindowStyle}">
@@ -58,7 +58,7 @@
                     Padding="16,8"
                     HorizontalAlignment="Center"
                     Cursor="Hand">
-                <TextBlock Text="Close" TextDecorations="Underline"/>
+                <TextBlock Text="{Binding Strings.BtnCancel, FallbackValue='Close'}" TextDecorations="Underline"/>
             </Button>
         </StackPanel>
     </Grid>

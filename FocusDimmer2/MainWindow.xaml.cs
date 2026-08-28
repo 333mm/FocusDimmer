@@ -61,6 +61,8 @@ namespace FocusDimmer
             if (!createdNew)
             {
                 _reallyExit = true;
+                uint showMsg = NativeMethods.RegisterWindowMessage("FocusDimmer_ShowMainWindow_Msg");
+                NativeMethods.PostMessage(NativeMethods.HWND_BROADCAST, showMsg, IntPtr.Zero, IntPtr.Zero);
                 Application.Current.Shutdown();
                 return;
             }
@@ -84,6 +86,7 @@ namespace FocusDimmer
         private async void InitializeAppAsync()
         {
             var settings = ViewModel.GetCurrentSettings();
+            var handle = new WindowInteropHelper(this).EnsureHandle();
 
 #if LITE_VERSION
             ViewModel.IsPro = false;
@@ -93,7 +96,7 @@ namespace FocusDimmer
 #elif PRO_VERSION
             ViewModel.IsPro = true;
 #else
-            if (await _storeService.InitializeAsync(settings))
+            if (await _storeService.InitializeAsync(settings, handle))
             {
                 _settingsService.SaveImmediately(settings);
             }
@@ -103,7 +106,7 @@ namespace FocusDimmer
 #if PRO_VERSION
             ViewModel.IsPro = true;
 #else
-            if (await _storeService.InitializeAsync(settings))
+            if (await _storeService.InitializeAsync(settings, handle))
             {
                 _settingsService.SaveImmediately(settings);
             }
@@ -170,6 +173,8 @@ namespace FocusDimmer
             ViewModel.LoadPresetsFromSettings();
         }
 
+        private uint _wmShowMainWindowMsg;
+
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
@@ -180,6 +185,32 @@ namespace FocusDimmer
             _hotkeyService.ToggleHotkeyPressed += OnToggleHotkey;
             _hotkeyService.DarkerHotkeyPressed += () => AdjustActiveMonitorOpacity(5);
             _hotkeyService.LighterHotkeyPressed += () => AdjustActiveMonitorOpacity(-5);
+
+            _wmShowMainWindowMsg = NativeMethods.RegisterWindowMessage("FocusDimmer_ShowMainWindow_Msg");
+            var source = HwndSource.FromHwnd(handle);
+            source?.AddHook(WndProc);
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (_wmShowMainWindowMsg != 0 && (uint)msg == _wmShowMainWindowMsg)
+            {
+                ShowWindowAndBringToFront();
+                handled = true;
+            }
+            return IntPtr.Zero;
+        }
+
+        public void ShowWindowAndBringToFront()
+        {
+            this.Show();
+            if (this.WindowState == WindowState.Minimized)
+            {
+                this.WindowState = WindowState.Normal;
+            }
+            this.Activate();
+            var handle = new WindowInteropHelper(this).Handle;
+            NativeMethods.SetForegroundWindow(handle);
         }
 
         #endregion
@@ -189,7 +220,7 @@ namespace FocusDimmer
         private void RestoreWindowBounds()
         {
             var settings = ViewModel.GetCurrentSettings();
-            if (settings.WindowWidth > 0 && settings.WindowHeight > 0)
+            if (settings.WindowWidth >= 300 && settings.WindowHeight >= 300)
             {
                 this.Width = settings.WindowWidth;
                 this.Height = settings.WindowHeight;
@@ -197,12 +228,55 @@ namespace FocusDimmer
 
             if (settings.WindowLeft > -9000 && settings.WindowTop > -9000)
             {
-                this.WindowStartupLocation = WindowStartupLocation.Manual;
-                this.Left = settings.WindowLeft;
-                this.Top = settings.WindowTop;
+                double targetLeft = settings.WindowLeft;
+                double targetTop = settings.WindowTop;
+                double targetWidth = this.Width;
+                double targetHeight = this.Height;
 
-                if (this.Left < SystemParameters.VirtualScreenLeft - this.Width + 50) this.Left = SystemParameters.VirtualScreenLeft;
-                if (this.Top < SystemParameters.VirtualScreenTop - this.Height + 50) this.Top = SystemParameters.VirtualScreenTop;
+                // Check if the saved position intersects with any active monitor's working area
+                bool isVisibleOnAnyScreen = false;
+                var windowRect = new System.Drawing.Rectangle(
+                    (int)targetLeft,
+                    (int)targetTop,
+                    (int)targetWidth,
+                    (int)targetHeight
+                );
+
+                foreach (var screen in WinForms.Screen.AllScreens)
+                {
+                    var intersection = System.Drawing.Rectangle.Intersect(screen.WorkingArea, windowRect);
+                    if (intersection.Width >= 100 && intersection.Height >= 100)
+                    {
+                        isVisibleOnAnyScreen = true;
+                        break;
+                    }
+                }
+
+                if (isVisibleOnAnyScreen)
+                {
+                    this.WindowStartupLocation = WindowStartupLocation.Manual;
+                    this.Left = targetLeft;
+                    this.Top = targetTop;
+                }
+                else
+                {
+                    // Center on primary monitor if saved position is off-screen
+                    var primary = WinForms.Screen.PrimaryScreen ?? WinForms.Screen.AllScreens.FirstOrDefault();
+                    if (primary != null)
+                    {
+                        this.WindowStartupLocation = WindowStartupLocation.Manual;
+                        this.Left = primary.WorkingArea.Left + Math.Max(0, (primary.WorkingArea.Width - this.Width) / 2);
+                        this.Top = primary.WorkingArea.Top + Math.Max(0, (primary.WorkingArea.Height - this.Height) / 2);
+                    }
+                    else
+                    {
+                        this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                    }
+                }
+            }
+            else
+            {
+                this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             }
         }
 
@@ -359,7 +433,7 @@ namespace FocusDimmer
                 try
                 {
                     Color current = (Color)ColorConverter.ConvertFromString(profile.OverlayColorHex ?? "#000000");
-                    var picker = new ColorPickerWindow(current) { Owner = this };
+                    var picker = new ColorPickerWindow(current, ViewModel.Strings) { Owner = this };
                     if (picker.ShowDialog() == true)
                     {
                         var c = picker.SelectedColor;
@@ -478,6 +552,20 @@ namespace FocusDimmer
         }
 
 
+        private const string GitHubRepoUrl = "https://github.com/333mm/FocusDimmer";
+
+        private void GitHub_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(GitHubRepoUrl) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MainWindow] Failed to open GitHub: {ex.Message}");
+            }
+        }
+
         private void MigrationInfo_Click(object sender, RoutedEventArgs e)
         {
             var guide = new MigrationGuideWindow(ViewModel.Strings) { Owner = this };
@@ -506,17 +594,21 @@ namespace FocusDimmer
                 ViewModel.IsPro = _storeService.IsPro;
                 if (ViewModel.IsPro)
                 {
+                    var settings = ViewModel.GetCurrentSettings();
+                    settings.IsProPurchased = true;
+                    _settingsService.SaveImmediately(settings);
+
                     ViewModel.Strings.AppTitle = ViewModel.Strings.AppTitle.Replace(" (Free Lite)", "");
                     InitializeMonitors();
-                    System.Windows.MessageBox.Show("Thank you for your purchase!\nPro features unlocked.", "Success");
+                    System.Windows.MessageBox.Show(ViewModel.Strings.MsgPurchaseSuccess, ViewModel.Strings.TitleSuccess);
                 }
             }
             else if (status != Windows.Services.Store.StorePurchaseStatus.NotPurchased)
             {
                 string errorMsg = error != null ? error.Message : "Unknown Error";
-                string fullMsg = $"Purchase Failed.\nStatus: {status}\nError: {errorMsg}\n\nDo you want to open the Store Page manually?";
+                string fullMsg = string.Format(ViewModel.Strings.MsgPurchaseFailedManual, status, errorMsg);
 
-                var res = System.Windows.MessageBox.Show(fullMsg, "Purchase Error", MessageBoxButton.YesNo, MessageBoxImage.Error);
+                var res = System.Windows.MessageBox.Show(fullMsg, ViewModel.Strings.TitlePurchaseError, MessageBoxButton.YesNo, MessageBoxImage.Error);
                 if (res == MessageBoxResult.Yes)
                 {
                     try { Process.Start(new ProcessStartInfo(AppStoreUrl) { UseShellExecute = true }); } catch { }
@@ -579,7 +671,7 @@ namespace FocusDimmer
             {
                 if (ViewModel.GlobalPresets.Count <= 1) return;
 
-                var result = System.Windows.MessageBox.Show(ViewModel.Strings.MsgConfirmDeletePreset, "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = System.Windows.MessageBox.Show(ViewModel.Strings.MsgConfirmDeletePreset, ViewModel.Strings.TitleConfirm, MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
                     var toDelete = ViewModel.SelectedGlobalPreset;
@@ -760,29 +852,30 @@ namespace FocusDimmer
             catch { }
         }
 
+        private WinForms.ToolStripMenuItem? _trayExitItem;
+        private WinForms.ToolStripMenuItem? _trayOpenItem;
+
         private void SetupTrayIcon()
         {
             var menu = new WinForms.ContextMenuStrip();
 
-            var openItem = new WinForms.ToolStripMenuItem("Focus Dimmer", null, (s, e) =>
+            _trayOpenItem = new WinForms.ToolStripMenuItem(ViewModel.Strings.AppTitle, null, (s, e) =>
             {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-                this.Activate();
+                ShowWindowAndBringToFront();
             })
             {
                 Font = new System.Drawing.Font(menu.Font, System.Drawing.FontStyle.Bold)
             };
 
-            var exitItem = new WinForms.ToolStripMenuItem(ViewModel.Strings.BtnClose, null, (s, e) =>
+            _trayExitItem = new WinForms.ToolStripMenuItem(ViewModel.Strings.MenuExit, null, (s, e) =>
             {
                 _reallyExit = true;
                 this.Close();
             });
 
-            menu.Items.Add(openItem);
+            menu.Items.Add(_trayOpenItem);
             menu.Items.Add(new WinForms.ToolStripSeparator());
-            menu.Items.Add(exitItem);
+            menu.Items.Add(_trayExitItem);
 
             _notifyIcon = new WinForms.NotifyIcon
             {
@@ -794,9 +887,14 @@ namespace FocusDimmer
 
             _notifyIcon.DoubleClick += (s, e) =>
             {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-                this.Activate();
+                ShowWindowAndBringToFront();
+            };
+
+            ViewModel.Strings.PropertyChanged += (s, e) =>
+            {
+                if (_trayExitItem != null) _trayExitItem.Text = ViewModel.Strings.MenuExit;
+                if (_trayOpenItem != null) _trayOpenItem.Text = ViewModel.Strings.AppTitle;
+                if (_notifyIcon != null) _notifyIcon.Text = ViewModel.Strings.AppTitle;
             };
         }
 
@@ -804,8 +902,7 @@ namespace FocusDimmer
         {
             if (_notifyIcon != null && _notifyIcon.Visible)
             {
-                string msg = ViewModel.SelectedLanguageIndex == 1 ? "バックグラウンドで起動しました。" : "Started in background.";
-                _notifyIcon.ShowBalloonTip(3000, ViewModel.Strings.AppTitle, msg, WinForms.ToolTipIcon.Info);
+                _notifyIcon.ShowBalloonTip(3000, ViewModel.Strings.AppTitle, ViewModel.Strings.MsgStartedInBackground, WinForms.ToolTipIcon.Info);
             }
         }
 

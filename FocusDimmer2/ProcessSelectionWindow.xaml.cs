@@ -287,7 +287,7 @@ namespace FocusDimmer
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("Error opening safe file dialog: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("Error opening safe file dialog: " + ex.Message, Strings?.TitleError ?? "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

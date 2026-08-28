@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:components="clr-namespace:FocusDimmer.Components"
         mc:Ignorable="d"
-        Title="Select Process" Height="550" Width="450"
+        Title="{Binding Strings.TitleSelectProcess, RelativeSource={RelativeSource Self}}" Height="550" Width="450"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize"
         Style="{StaticResource FluentWindowStyle}"

@@ -88,7 +88,6 @@
   "NavMonitors": "モニター",
   "NavExclusions": "除外設定",
   "NavHotkeys": "ホットキー",
-
   "NavPresets": "プリセット",
   "NavGeneral": "一般設定",
   "HeaderAdvancedBehavior": "高度な動作設定",
@@ -103,5 +102,19 @@
   "TooltipLinkMonitors": "有効にすると、すべてのディスプレイの設定が同時に連動して変更されます。",
   "HeaderMultiMonitorPro": "マルチモニター減光制御",
   "DescMultiMonitorPro": "接続された複数のディスプレイを個別に減光・連動制御するにはPRO版が必要です。",
-  "BtnUpgradePro": "PROにアップグレード"
+  "BtnUpgradePro": "PROにアップグレード",
+  "MenuExit": "アプリを終了",
+  "MsgStartedInBackground": "バックグラウンドで起動しました。",
+  "TitleMigrationGuide": "移行ガイド",
+  "TitleSelectProcess": "アプリ選択",
+  "TitleSelectAction": "アクションの選択",
+  "TitleInspector": "Focus Dimmer インスペクター",
+  "MsgPurchaseSuccess": "ご購入ありがとうございます！\nPro版の機能がアンロックされました。",
+  "TitleSuccess": "成功",
+  "TitleConfirm": "確認",
+  "TitleError": "エラー",
+  "TitlePurchaseError": "購入エラー",
+  "MsgPurchaseFailedManual": "購入処理に失敗しました。\nステータス: {0}\nエラー: {1}\n\nストアページを手動で開きますか？",
+  "BtnGitHub": "GitHub",
+  "TooltipGitHub": "GitHub リポジトリを開く"
 }
