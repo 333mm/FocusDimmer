@@ -34,6 +34,8 @@
         <SolidColorBrush x:Key="TextTertiary" Color="{StaticResource ColorTextTertiary}"/>
         <SolidColorBrush x:Key="BorderBrush" Color="#16FFFFFF"/>
         <SolidColorBrush x:Key="CardBorderBrush" Color="#1CFFFFFF"/>
+        <SolidColorBrush x:Key="HoverBackground" Color="{StaticResource ColorControlBgHover}"/>
+        <SolidColorBrush x:Key="PressedBackground" Color="#15FFFFFF"/>
 
 
 

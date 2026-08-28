@@ -139,10 +139,10 @@
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource HoverBackground}"/>
+                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource ControlBackgroundHover}"/>
                                                 </Trigger>
                                                 <Trigger Property="IsPressed" Value="True">
-                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource PressedBackground}"/>
+                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource ControlBackground}"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
